@@ -1,5 +1,4 @@
 // external libraries
-import 'babel-polyfill';
 import _ from 'lodash';
 import PubSub from 'pubsub-js';
 import LZString from 'lz-string';
