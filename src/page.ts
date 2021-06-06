@@ -102,7 +102,7 @@ function appendStyle(style, doc) {
  * @param  {Document} doc       The document to prepare
  * @return {Document}           The document passed
  */
-function prepareDom(doc, cfg = {}) {
+function prepareDom(doc, cfg: any = {}) {
   if (!(doc instanceof Document)) {
     console.warn("Cannnot prepare, the provided element is not a document.");
     return;
@@ -128,11 +128,11 @@ function prepareDom(doc, cfg = {}) {
  * @param  {Object} response        The data object
  * @return {Document}               The newly created document
  */
-function makeDom(cfg, response) {
+function makeDom(cfg, response = []) {
   // apply defaults
   _.defaults(cfg, defaults);
   // create Document
-  let doc = Parser.dom(
+  let doc: any = Parser.dom(
     cfg.template,
     _.isPlainObject(cfg.data) ? cfg.data : cfg.data(response)
   );
@@ -183,6 +183,7 @@ function makePage(cfg) {
         );
       } else if (cfg.url) {
         // make ajax request if a url is provided
+        // @ts-ignore
         Ajax.get(cfg.url, cfg.options).then(
           (xhr) => {
             resolve(makeDom(cfg, xhr.response));

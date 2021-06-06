@@ -1,5 +1,7 @@
 'use strict';
 
+require('tvml');
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var lodash = {exports: {}};
@@ -18064,7 +18066,6 @@ var LZString = lzString.exports;
 
 const parser = new DOMParser(); // native DOM parser
 const xmlPrefix = '<?xml version="1.0" encoding="UTF-8" ?>'; // xml prefix
-
 /**
  * Parses the given XML string or a function and returns a DOM
  *
@@ -18075,20 +18076,16 @@ const xmlPrefix = '<?xml version="1.0" encoding="UTF-8" ?>'; // xml prefix
  * @return {Document}               A new Document
  */
 function parse(s, data) {
-  // if a template function is provided, call the function with data
-  s = _.isFunction(s) ? s(data) : s;
-
-  console.log("parsing string...");
-  console.log(s);
-
-  // prepend the xml string if not already present
-  if (!_.startsWith(s, "<?xml")) {
-    s = xmlPrefix + s;
-  }
-
-  return parser.parseFromString(s, "application/xml");
+    // if a template function is provided, call the function with data
+    s = _.isFunction(s) ? s(data) : s;
+    console.log("parsing string...");
+    console.log(s);
+    // prepend the xml string if not already present
+    if (!_.startsWith(s, "<?xml")) {
+        s = xmlPrefix + s;
+    }
+    return parser.parseFromString(s, "application/xml");
 }
-
 /**
  * A minimalistic parsing wrapper library using the native DOMParser
  *
@@ -18097,16 +18094,16 @@ function parse(s, data) {
  * @author eMAD <emad.alam@yahoo.com>
  */
 var Parser = {
-  /**
-   * Parses the given XML string or a function and returns a DOM
-   *
-   * @param  {String|Function} s      The template function or the string
-   * @param  {Object} [data]          The data that will be applied to the function
-   * @return {Document}               A new Document
-   */
-  dom(s, data) {
-    return parse(s, data);
-  },
+    /**
+     * Parses the given XML string or a function and returns a DOM
+     *
+     * @param  {String|Function} s      The template function or the string
+     * @param  {Object} [data]          The data that will be applied to the function
+     * @return {Document}               A new Document
+     */
+    dom(s, data = []) {
+        return parse(s, data);
+    },
 };
 
 /**
@@ -18116,9 +18113,8 @@ var Parser = {
  * @type {Object}
  */
 const defaults$3 = {
-  responseType: "json",
+    responseType: "json",
 };
-
 /**
  * A function to perform ajax requests. It returns promise instead of relying on callbacks.
  *
@@ -18135,151 +18131,130 @@ const defaults$3 = {
  * @return {Promise}                                     The Promise that resolves on ajax success
  */
 function ajax(url, options, method = "GET") {
-  if (typeof url == "undefined") {
-    console.error("No url specified for the ajax.");
-    throw new TypeError("A URL is required for making the ajax request.");
-  }
-
-  if (typeof options === "undefined" && typeof url === "object" && url.url) {
-    options = url;
-    url = options.url;
-  } else if (typeof url !== "string") {
-    console.error("No url/options specified for the ajax.");
-    throw new TypeError(
-      "Options must be an object for making the ajax request."
-    );
-  }
-
-  // default options
-  options = Object.assign({}, defaults$3, options, { method: method });
-
-  console.log(
-    `initiating ajax request... url: ${url}`,
-    " :: options:",
-    options
-  );
-
-  return new Promise((resolve, reject) => {
-    let xhr = new XMLHttpRequest();
-
-    // set response type
-    if (options.responseType) {
-      xhr.responseType = options.responseType;
+    if (typeof url == "undefined") {
+        console.error("No url specified for the ajax.");
+        throw new TypeError("A URL is required for making the ajax request.");
     }
-    // open connection
-    xhr.open(
-      options.method,
-      url,
-      typeof options.async === "undefined" ? true : options.async,
-      options.user,
-      options.password
-    );
-    // set headers
-    Object.keys(options.headers || {}).forEach(function (name) {
-      xhr.setRequestHeader(name, options.headers[name]);
+    if (typeof options === "undefined" && typeof url === "object" && url.url) {
+        options = url;
+        url = options.url;
+    }
+    else if (typeof url !== "string") {
+        console.error("No url/options specified for the ajax.");
+        throw new TypeError("Options must be an object for making the ajax request.");
+    }
+    // default options
+    options = Object.assign({}, defaults$3, options, { method: method });
+    console.log(`initiating ajax request... url: ${url}`, " :: options:", options);
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        // set response type
+        if (options.responseType) {
+            xhr.responseType = options.responseType;
+        }
+        // open connection
+        xhr.open(options.method, url, typeof options.async === "undefined" ? true : options.async, options.user, options.password);
+        // set headers
+        Object.keys(options.headers || {}).forEach(function (name) {
+            xhr.setRequestHeader(name, options.headers[name]);
+        });
+        // listen to the state change
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== 4) {
+                return;
+            }
+            if (xhr.status >= 200 && xhr.status <= 300) {
+                resolve(xhr);
+            }
+            else {
+                reject(xhr);
+            }
+        };
+        // error handling
+        xhr.addEventListener("error", () => reject(xhr));
+        xhr.addEventListener("abort", () => reject(xhr));
+        // send request
+        xhr.send(options.data);
     });
-    // listen to the state change
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState !== 4) {
-        return;
-      }
-
-      if (xhr.status >= 200 && xhr.status <= 300) {
-        resolve(xhr);
-      } else {
-        reject(xhr);
-      }
-    };
-    // error handling
-    xhr.addEventListener("error", () => reject(xhr));
-    xhr.addEventListener("abort", () => reject(xhr));
-    // send request
-    xhr.send(options.data);
-  });
 }
-
 Object.assign(ajax, {
-  /**
-   * Perform an ajax request using HTTP GET
-   *
-   * @example
-   * ATV.Ajax.get('http://api.mymovieapp.com/movies')
-   *         .then((response) => // do something with the response)
-   *         .catch((error) => // catch errors )
-   *
-   * @alias module:ajax.get
-   *
-   * @param  {string} url                         Resource url
-   * @param  {Object} [options={@link defaults}]  Ajax options
-   * @return {Promise}                            The Promise that resolves on ajax success
-   */
-  get(url, options) {
-    return ajax(url, options, "GET");
-  },
-  /**
-   * Perform an ajax request using HTTP POST
-   *
-   * @example
-   * ATV.Ajax.post('http://api.mymovieapp.com/movies', {data})
-   *         .then((response) => // do something with the response)
-   *         .catch((error) => // catch errors )
-   *
-   * @alias module:ajax.post
-   *
-   * @param  {string} url                         Resource url
-   * @param  {Object} [options={@link defaults}]  Ajax options
-   * @return {Promise}                            The Promise that resolves on ajax success
-   */
-  post(url, options) {
-    return ajax(url, options, "POST");
-  },
-  /**
-   * Perform an ajax request using HTTP PUT
-   *
-   * @alias module:ajax.put
-   *
-   * @param  {string} url                         Resource url
-   * @param  {Object} [options={@link defaults}]  Ajax options
-   * @return {Promise}                            The Promise that resolves on ajax success
-   */
-  put(url, options) {
-    return ajax(url, options, "PUT");
-  },
-  /**
-   * Perform an ajax request using HTTP DELETE
-   *
-   * @alias module:ajax.del
-   *
-   * @param  {string} url                         Resource url
-   * @param  {Object} [options={@link defaults}]  Ajax options
-   * @return {Promise}                            The Promise that resolves on ajax success
-   */
-  del(url, options) {
-    return ajax(url, options, "DELETE");
-  },
+    /**
+     * Perform an ajax request using HTTP GET
+     *
+     * @example
+     * ATV.Ajax.get('http://api.mymovieapp.com/movies')
+     *         .then((response) => // do something with the response)
+     *         .catch((error) => // catch errors )
+     *
+     * @alias module:ajax.get
+     *
+     * @param  {string} url                         Resource url
+     * @param  {Object} [options={@link defaults}]  Ajax options
+     * @return {Promise}                            The Promise that resolves on ajax success
+     */
+    get(url, options) {
+        return ajax(url, options, "GET");
+    },
+    /**
+     * Perform an ajax request using HTTP POST
+     *
+     * @example
+     * ATV.Ajax.post('http://api.mymovieapp.com/movies', {data})
+     *         .then((response) => // do something with the response)
+     *         .catch((error) => // catch errors )
+     *
+     * @alias module:ajax.post
+     *
+     * @param  {string} url                         Resource url
+     * @param  {Object} [options={@link defaults}]  Ajax options
+     * @return {Promise}                            The Promise that resolves on ajax success
+     */
+    post(url, options) {
+        return ajax(url, options, "POST");
+    },
+    /**
+     * Perform an ajax request using HTTP PUT
+     *
+     * @alias module:ajax.put
+     *
+     * @param  {string} url                         Resource url
+     * @param  {Object} [options={@link defaults}]  Ajax options
+     * @return {Promise}                            The Promise that resolves on ajax success
+     */
+    put(url, options) {
+        return ajax(url, options, "PUT");
+    },
+    /**
+     * Perform an ajax request using HTTP DELETE
+     *
+     * @alias module:ajax.del
+     *
+     * @param  {string} url                         Resource url
+     * @param  {Object} [options={@link defaults}]  Ajax options
+     * @return {Promise}                            The Promise that resolves on ajax success
+     */
+    del(url, options) {
+        return ajax(url, options, "DELETE");
+    },
 });
 
 // base menu string for initial document creation
-const docStr =
-  "<document><menuBarTemplate><menuBar></menuBar></menuBarTemplate></document>";
-
+const docStr = "<document><menuBarTemplate><menuBar></menuBar></menuBarTemplate></document>";
 // indicate whether the menu was created
 let created = false;
-
 // few private instances
 let doc = Parser.dom(docStr);
 let menuBarEl = doc.getElementsByTagName("menuBar").item(0);
 let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0);
+// @ts-ignore
 let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
 let itemsCache = {};
-
 // default menu options
 let defaults$2 = {
-  attributes: {},
-  rootTemplateAttributes: {},
-  items: [],
+    attributes: {},
+    rootTemplateAttributes: {},
+    items: [],
 };
-
 /**
  * Sets the default menu options
  *
@@ -18289,11 +18264,10 @@ let defaults$2 = {
  * @param {Object} cfg The configuration object
  */
 function setOptions$3(cfg = {}) {
-  console.log("setting menu options...", cfg);
-  // override the default options
-  _.assign(defaults$2, cfg);
+    console.log("setting menu options...", cfg);
+    // override the default options
+    _.assign(defaults$2, cfg);
 }
-
 /**
  * Iterates and sets attributes to an element.
  *
@@ -18303,10 +18277,9 @@ function setOptions$3(cfg = {}) {
  * @param {Object} attributes 	Attributes key value pairs.
  */
 function setAttributes(el, attributes) {
-  console.log("setting attributes on element...", el, attributes);
-  _.each(attributes, (value, name) => el.setAttribute(name, value));
+    console.log("setting attributes on element...", el, attributes);
+    _.each(attributes, (value, name) => el.setAttribute(name, value));
 }
-
 /**
  * Returns instance of the menu document (auto create if not already created)
  *
@@ -18316,12 +18289,11 @@ function setAttributes(el, attributes) {
  * @return {Document}		Instance of the created menu document.
  */
 function get() {
-  if (!created) {
-    create();
-  }
-  return doc;
+    if (!created) {
+        create();
+    }
+    return doc;
 }
-
 /**
  * Adds menu item to the menu document.
  *
@@ -18330,33 +18302,28 @@ function get() {
  * @param {Object} item 	The configuration realted to the menu item.
  */
 function addItem(item = {}) {
-  if (!item.id) {
-    console.warn(
-      "Cannot add menuitem. A unique identifier is required for the menuitem to work correctly."
-    );
-    return;
-  }
-  let el = doc.createElement("menuItem");
-  // assign unique id
-  item.attributes = _.assign({}, item.attributes, {
-    id: item.id,
-  });
-  // add all attributes
-  setAttributes(el, item.attributes);
-  // add title
-  el.innerHTML = `<title>${
-    _.isFunction(item.name) ? item.name() : item.name
-  }</title>`;
-  // add page reference
-  el.page = item.page;
-  // appends to the menu
-  menuBarEl.insertBefore(el, null);
-  // cache for later use
-  itemsCache[item.id] = el;
-
-  return el;
+    if (!item.id) {
+        console.warn("Cannot add menuitem. A unique identifier is required for the menuitem to work correctly.");
+        return;
+    }
+    let el = doc.createElement("menuItem");
+    // assign unique id
+    item.attributes = _.assign({}, item.attributes, {
+        id: item.id,
+    });
+    // add all attributes
+    setAttributes(el, item.attributes);
+    // add title
+    el.innerHTML = `<title>${_.isFunction(item.name) ? item.name() : item.name}</title>`;
+    // add page reference
+    // @ts-ignore
+    el.page = item.page;
+    // appends to the menu
+    menuBarEl.insertBefore(el, null);
+    // cache for later use
+    itemsCache[item.id] = el;
+    return el;
 }
-
 /**
  * Generates a menu from the configuration object.
  *
@@ -18393,27 +18360,23 @@ function addItem(item = {}) {
  * @return {Document}     		The created menu document
  */
 function create(cfg = {}) {
-  if (created) {
-    console.warn("An instance of menu already exists, skipping creation...");
-    return;
-  }
-  // defaults
-  _.assign(defaults$2, cfg);
-
-  console.log("creating menu...", defaults$2);
-
-  // set attributes to the menubar element
-  setAttributes(menuBarEl, defaults$2.attributes);
-  // set attributes to the menubarTemplate element
-  setAttributes(menuBarTpl, defaults$2.rootTemplateAttributes);
-  // add all items to the menubar
-  _.each(defaults$2.items, (item) => addItem(item));
-  // indicate done
-  created = true;
-
-  return doc;
+    if (created) {
+        console.warn("An instance of menu already exists, skipping creation...");
+        return;
+    }
+    // defaults
+    _.assign(defaults$2, cfg);
+    console.log("creating menu...", defaults$2);
+    // set attributes to the menubar element
+    setAttributes(menuBarEl, defaults$2.attributes);
+    // set attributes to the menubarTemplate element
+    setAttributes(menuBarTpl, defaults$2.rootTemplateAttributes);
+    // add all items to the menubar
+    _.each(defaults$2.items, (item) => addItem(item));
+    // indicate done
+    created = true;
+    return doc;
 }
-
 /**
  * Associate a document to the menuitem (using the menuitem's unique id).
  *
@@ -18424,17 +18387,13 @@ function create(cfg = {}) {
  * @param {String} menuItemid		The id of the menu item as per the configuration
  */
 function setDocument(doc, menuItemid) {
-  let menuItem = itemsCache[menuItemid];
-
-  if (!menuItem) {
-    console.warn(
-      `Cannot set document to the menuitem. The given id ${menuItemid} does not exist.`
-    );
-    return;
-  }
-  menuBarFeature.setDocument(doc, menuItem);
+    let menuItem = itemsCache[menuItemid];
+    if (!menuItem) {
+        console.warn(`Cannot set document to the menuitem. The given id ${menuItemid} does not exist.`);
+        return;
+    }
+    menuBarFeature.setDocument(doc, menuItem);
 }
-
 /**
  * Set the given menuitem as active (using the menuitem's unique id).
  *
@@ -18444,17 +18403,13 @@ function setDocument(doc, menuItemid) {
  * @param {String} menuItemid 		The id of the menu item as per the configuration
  */
 function setSelectedItem(menuItemid) {
-  let menuItem = itemsCache[menuItemid];
-
-  if (!menuItem) {
-    console.warn(
-      `Cannot select menuitem. The given id ${menuItemid} does not exist.`
-    );
-    return;
-  }
-  menuBarFeature.setSelectedItem(menuItem);
+    let menuItem = itemsCache[menuItemid];
+    if (!menuItem) {
+        console.warn(`Cannot select menuitem. The given id ${menuItemid} does not exist.`);
+        return;
+    }
+    menuBarFeature.setSelectedItem(menuItem);
 }
-
 /**
  * A very minimalistic library to manage Apple TV menu bars.
  *
@@ -18464,51 +18419,58 @@ function setSelectedItem(menuItemid) {
  *
  */
 var Menu = {
-  /**
-   * Whether the menu was already created.
-   * @return {Boolean} Created
-   */
-  get created() {
-    return created;
-  },
-  set created(val) {},
-  setOptions: setOptions$3,
-  create: create,
-  get: get,
-  setDocument: setDocument,
-  setSelectedItem: setSelectedItem,
-  /**
-   * Get the menu loading message if provided in the config
-   * @return {String} Loading message
-   */
-  getLoadingMessage() {
-    return _.isFunction(defaults$2.loadingMessage)
-      ? defaults$2.loadingMessage()
-      : defaults$2.loadingMessage;
-  },
-  /**
-   * Get the menu error message if provided in the config
-   * @return {String} Error message
-   */
-  getErrorMessage() {
-    return _.isFunction(defaults$2.errorMessage)
-      ? defaults$2.errorMessage()
-      : defaults$2.errorMessage;
-  },
+    /**
+     * Whether the menu was already created.
+     * @return {Boolean} Created
+     */
+    get created() {
+        return created;
+    },
+    set created(val) { },
+    setOptions: setOptions$3,
+    create: create,
+    get: get,
+    setDocument: setDocument,
+    setSelectedItem: setSelectedItem,
+    /**
+     * Get the menu loading message if provided in the config
+     * @return {String} Loading message
+     */
+    getLoadingMessage() {
+        // @ts-ignore
+        return _.isFunction(defaults$2.loadingMessage)
+            ? // @ts-ignore
+                defaults$2.loadingMessage()
+            : // @ts-ignore
+                defaults$2.loadingMessage;
+    },
+    /**
+     * Get the menu error message if provided in the config
+     * @return {String} Error message
+     */
+    getErrorMessage() {
+        // @ts-ignore
+        return _.isFunction(defaults$2.errorMessage)
+            ? // @ts-ignore
+                defaults$2.errorMessage()
+            : // @ts-ignore
+                defaults$2.errorMessage;
+    },
 };
 
 // few private variables
 let menuDoc = null;
 let loaderDoc = null;
 let errorDoc = null;
-
 // default options
 let defaults$1 = {
-  templates: {
-    status: {},
-  },
+    templates: {
+        status: {},
+        loader: null,
+        error: null,
+    },
+    menu: null,
 };
-
 /**
  * Sets the default options for navigation.
  *
@@ -18517,11 +18479,10 @@ let defaults$1 = {
  * @param {Object} cfg The configuration object {defaults}
  */
 function setOptions$2(cfg = {}) {
-  console.log("setting navigation options...", cfg);
-  // override the default options
-  _.assign(defaults$1, cfg);
+    console.log("setting navigation options...", cfg);
+    // override the default options
+    _.assign(defaults$1, cfg);
 }
-
 /**
  * Get a loader document.
  *
@@ -18532,12 +18493,10 @@ function setOptions$2(cfg = {}) {
  * @return {Document}               A newly created loader document
  */
 function getLoaderDoc(message) {
-  let tpl = defaults$1.templates.loader;
-  let str = (tpl && tpl({ message: message })) || "<document></document>";
-
-  return Parser.dom(str);
+    let tpl = defaults$1.templates.loader;
+    let str = (tpl && tpl({ message: message })) || "<document></document>";
+    return Parser.dom(str);
 }
-
 /**
  * Get an error document.
  *
@@ -18548,20 +18507,19 @@ function getLoaderDoc(message) {
  * @return {Document}                       A newly created error document
  */
 function getErrorDoc(message) {
-  let cfg = {};
-  if (_.isPlainObject(message)) {
-    cfg = message;
-    if (cfg.status && !cfg.template && defaults$1.templates.status[cfg.status]) {
-      cfg.template = defaults$1.templates.status[cfg.status];
+    let cfg = {};
+    if (_.isPlainObject(message)) {
+        cfg = message;
+        if (cfg.status && !cfg.template && defaults$1.templates.status[cfg.status]) {
+            cfg.template = defaults$1.templates.status[cfg.status];
+        }
     }
-  } else {
-    cfg.template = defaults$1.templates.error || (() => "<document></document>");
-    cfg.data = { message: message };
-  }
-
-  return Page.makeDom(cfg);
+    else {
+        cfg.template = defaults$1.templates.error || (() => "<document></document>");
+        cfg.data = { message: message };
+    }
+    return Page.makeDom(cfg);
 }
-
 /**
  * Gets the topmost document from the navigationDocument stack
  *
@@ -18570,33 +18528,28 @@ function getErrorDoc(message) {
  * @return {Document} The document
  */
 function getLastDocumentFromStack() {
-  let docs = navigationDocument.documents;
-  return docs[docs.length - 1];
+    let docs = navigationDocument.documents;
+    return docs[docs.length - 1];
 }
-
 /**
  * Initializes the menu document if present
  *
  * @private
  */
 function initMenu() {
-  let menuCfg = defaults$1.menu;
-
-  // no configuration given and neither the menu created earlier
-  // no need to proceed
-  if (!menuCfg && !Menu.created) {
-    return;
-  }
-
-  // set options to create menu
-  if (menuCfg) {
-    Menu.setOptions(menuCfg);
-  }
-
-  menuDoc = Menu.get();
-  Page.prepareDom(menuDoc);
+    let menuCfg = defaults$1.menu;
+    // no configuration given and neither the menu created earlier
+    // no need to proceed
+    if (!menuCfg && !Menu.created) {
+        return;
+    }
+    // set options to create menu
+    if (menuCfg) {
+        Menu.setOptions(menuCfg);
+    }
+    menuDoc = Menu.get();
+    Page.prepareDom(menuDoc);
 }
-
 /**
  * Helper function to perform navigation after applying the page level default handlers
  *
@@ -18606,29 +18559,28 @@ function initMenu() {
  * @return {Document}           The created document
  */
 function show(cfg = {}) {
-  if (_.isFunction(cfg)) {
-    cfg = {
-      template: cfg,
-    };
-  }
-
-  // no template exists, cannot proceed
-  if (!cfg.template) {
-    console.warn("No template found!");
-    return;
-  }
-  let doc = null;
-  if (getLastDocumentFromStack() && cfg.type === "modal") {
-    // show as a modal if there is something on the navigation stack
-    doc = presentModal(cfg);
-  } else {
-    // no document on the navigation stack, show as a document
-    doc = Page.makeDom(cfg);
-    cleanNavigate(doc);
-  }
-  return doc;
+    if (_.isFunction(cfg)) {
+        cfg = {
+            template: cfg,
+        };
+    }
+    // no template exists, cannot proceed
+    if (!cfg.template) {
+        console.warn("No template found!");
+        return;
+    }
+    let doc = null;
+    if (getLastDocumentFromStack() && cfg.type === "modal") {
+        // show as a modal if there is something on the navigation stack
+        doc = presentModal(cfg);
+    }
+    else {
+        // no document on the navigation stack, show as a document
+        doc = Page.makeDom(cfg);
+        cleanNavigate(doc);
+    }
+    return doc;
 }
-
 /**
  * Shows a loading page if a loader template exists.
  * Also applies any default handlers and caches the document for later use.
@@ -18640,27 +18592,23 @@ function show(cfg = {}) {
  * @return {Document}               The created loader document.
  */
 function showLoading(cfg = {}) {
-  if (_.isString(cfg)) {
-    cfg = {
-      data: {
-        message: cfg,
-      },
-    };
-  }
-  // use default loading template if not passed as a configuration
-  _.defaultsDeep(cfg, {
-    template: defaults$1.templates.loader,
-    type: "modal",
-  });
-
-  console.log("showing loader... options:", cfg);
-
-  // cache the doc for later use
-  loaderDoc = show(cfg);
-
-  return loaderDoc;
+    if (_.isString(cfg)) {
+        cfg = {
+            data: {
+                message: cfg,
+            },
+        };
+    }
+    // use default loading template if not passed as a configuration
+    _.defaultsDeep(cfg, {
+        template: defaults$1.templates.loader,
+        type: "modal",
+    });
+    console.log("showing loader... options:", cfg);
+    // cache the doc for later use
+    loaderDoc = show(cfg);
+    return loaderDoc;
 }
-
 /**
  * Shows the error page using the existing error template.
  * Also applies any default handlers and caches the document for later use.
@@ -18672,31 +18620,27 @@ function showLoading(cfg = {}) {
  * @return {Document}                       The created error document.
  */
 function showError(cfg = {}) {
-  if (_.isBoolean(cfg) && !cfg && errorDoc) {
-    // hide error
-    navigationDocument.removeDocument(errorDoc);
-    return;
-  }
-  if (_.isString(cfg)) {
-    cfg = {
-      data: {
-        message: cfg,
-      },
-    };
-  }
-  // use default error template if not passed as a configuration
-  _.defaultsDeep(cfg, {
-    template: defaults$1.templates.error,
-  });
-
-  console.log("showing error... options:", cfg);
-
-  // cache the doc for later use
-  errorDoc = show(cfg);
-
-  return errorDoc;
+    if (_.isBoolean(cfg) && !cfg && errorDoc) {
+        // hide error
+        navigationDocument.removeDocument(errorDoc);
+        return;
+    }
+    if (_.isString(cfg)) {
+        cfg = {
+            data: {
+                message: cfg,
+            },
+        };
+    }
+    // use default error template if not passed as a configuration
+    _.defaultsDeep(cfg, {
+        template: defaults$1.templates.error,
+    });
+    console.log("showing error... options:", cfg);
+    // cache the doc for later use
+    errorDoc = show(cfg);
+    return errorDoc;
 }
-
 /**
  * Pushes a given document to the navigation stack after applying all the default page level handlers.
  *
@@ -18705,13 +18649,12 @@ function showError(cfg = {}) {
  * @param  {Document} doc       The document to push to the navigation stack
  */
 function pushDocument(doc) {
-  if (!(doc instanceof Document)) {
-    console.warn("Cannot navigate to the document.", doc);
-    return;
-  }
-  navigationDocument.pushDocument(doc);
+    if (!(doc instanceof Document)) {
+        console.warn("Cannot navigate to the document.", doc);
+        return;
+    }
+    navigationDocument.pushDocument(doc);
 }
-
 /**
  * Replaces a document on the navigation stack with the provided new document.
  * Also adds the page level default handlers to the new document and removes the existing handlers from the document that is to be replaced.
@@ -18723,13 +18666,12 @@ function pushDocument(doc) {
  * @param  {Document} docToReplace      The document to replace
  */
 function replaceDocument(doc, docToReplace) {
-  if (!(doc instanceof Document) || !(docToReplace instanceof Document)) {
-    console.warn("Cannot replace document.");
-    return;
-  }
-  navigationDocument.replaceDocument(doc, docToReplace);
+    if (!(doc instanceof Document) || !(docToReplace instanceof Document)) {
+        console.warn("Cannot replace document.");
+        return;
+    }
+    navigationDocument.replaceDocument(doc, docToReplace);
 }
-
 /**
  * Performs a navigation by checking the existing document stack to see if any error or loader page needs to be replaced from the current stack
  *
@@ -18740,32 +18682,29 @@ function replaceDocument(doc, docToReplace) {
  * @return  {Document}                  The current document on the stack
  */
 function cleanNavigate(doc, replace = false) {
-  let docs = navigationDocument.documents;
-  let last = getLastDocumentFromStack();
-
-  if (!replace && (!last || (last !== loaderDoc && last !== errorDoc))) {
-    pushDocument(doc);
-  } else if ((last && last === loaderDoc) || last === errorDoc) {
-    // replaces any error or loader document from the current document stack
-    console.log("replacing current error/loader...");
-    replaceDocument(doc, last);
-    loaderDoc = null;
-    errorDoc = null;
-  }
-  // determine the current document on the navigation stack
-  last = replace && getLastDocumentFromStack();
-  // if replace is passed as a param and there is some document on the top of stack
-  if (last) {
-    console.log("replacing current document...");
-    replaceDocument(doc, last);
-  }
-
-  // dismisses any modal open modal
-  _.delay(dismissModal, 2000);
-
-  return docs[docs.length - 1];
+    let docs = navigationDocument.documents;
+    let last = getLastDocumentFromStack();
+    if (!replace && (!last || (last !== loaderDoc && last !== errorDoc))) {
+        pushDocument(doc);
+    }
+    else if ((last && last === loaderDoc) || last === errorDoc) {
+        // replaces any error or loader document from the current document stack
+        console.log("replacing current error/loader...");
+        replaceDocument(doc, last);
+        loaderDoc = null;
+        errorDoc = null;
+    }
+    // determine the current document on the navigation stack
+    last = replace && getLastDocumentFromStack();
+    // if replace is passed as a param and there is some document on the top of stack
+    if (last) {
+        console.log("replacing current document...");
+        replaceDocument(doc, last);
+    }
+    // dismisses any modal open modal
+    _.delay(dismissModal, 2000);
+    return docs[docs.length - 1];
 }
-
 /**
  * Navigates to the menu page if it exists
  *
@@ -18775,24 +18714,21 @@ function cleanNavigate(doc, replace = false) {
  * @return {Promise}      Returns a Promise that resolves upon successful navigation.
  */
 function navigateToMenuPage() {
-  console.log("navigating to menu...");
-
-  return new Promise((resolve, reject) => {
-    if (!menuDoc) {
-      initMenu();
-    }
-    if (!menuDoc) {
-      console.warn(
-        "No menu configuration exists, cannot navigate to the menu page."
-      );
-      reject();
-    } else {
-      cleanNavigate(menuDoc);
-      resolve(menuDoc);
-    }
-  });
+    console.log("navigating to menu...");
+    return new Promise((resolve, reject) => {
+        if (!menuDoc) {
+            initMenu();
+        }
+        if (!menuDoc) {
+            console.warn("No menu configuration exists, cannot navigate to the menu page.");
+            reject();
+        }
+        else {
+            cleanNavigate(menuDoc);
+            resolve(menuDoc);
+        }
+    });
 }
-
 /**
  * Navigates to the provided page if it exists in the list of available pages.
  *
@@ -18805,87 +18741,75 @@ function navigateToMenuPage() {
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
 function navigate(page, options, replace) {
-  let p = Page.get(page);
-
-  if (_.isBoolean(options)) {
-    replace = options;
-  } else {
-    options = options || {};
-  }
-
-  if (_.isBoolean(options.replace)) {
-    replace = options.replace;
-  }
-
-  console.log("navigating... page:", page, ":: options:", options);
-
-  // return a promise that resolves if there was a navigation that was performed
-  return new Promise((resolve, reject) => {
-    if (!p) {
-      console.error(page, "page does not exist!");
-      let tpl = defaults$1.templates.status["404"];
-      if (tpl) {
-        let doc = showError({
-          template: tpl,
-          title: "404",
-          message: "The requested page cannot be found!",
-        });
-        resolve(doc);
-      } else {
-        reject();
-      }
-      return;
+    let p = Page.get(page);
+    if (_.isBoolean(options)) {
+        replace = options;
     }
-
-    p(options).then(
-      (doc) => {
-        // support suppressing of navigation since there is no dom available (page resolved with empty document)
-        if (doc) {
-          // if page is a modal, show as modal window
-          if (p.type === "modal") {
-            // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
-            _.defer(presentModal, doc);
-          } else {
-            // navigate
-            // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
-            _.defer(cleanNavigate, doc, replace);
-          }
+    else {
+        options = options || {};
+    }
+    if (_.isBoolean(options.replace)) {
+        replace = options.replace;
+    }
+    console.log("navigating... page:", page, ":: options:", options);
+    // return a promise that resolves if there was a navigation that was performed
+    return new Promise((resolve, reject) => {
+        if (!p) {
+            console.error(page, "page does not exist!");
+            let tpl = defaults$1.templates.status["404"];
+            if (tpl) {
+                let doc = showError({
+                    template: tpl,
+                    title: "404",
+                    message: "The requested page cannot be found!",
+                });
+                resolve(doc);
+            }
+            else {
+                reject();
+            }
+            return;
         }
-        // resolve promise
-        resolve(doc);
-      },
-      (error) => {
-        // something went wrong during the page execution
-        // warn and set the status to 500
-        if (error instanceof Error) {
-          console.error(`There was an error in the page code. ${error}`);
-          error.status = "500";
-        }
-        // try showing a status level error page if it exists
-        let statusLevelErrorTpls = defaults$1.templates.status;
-        let tpl = statusLevelErrorTpls[error.status];
-        if (tpl) {
-          showError(
-            _.defaults(
-              {
-                template: tpl,
-              },
-              error.response
-            )
-          );
-          resolve(error);
-        } else {
-          console.warn(
-            "No error handler present in the page or navigation default configurations.",
-            error
-          );
-          reject(error);
-        }
-      }
-    );
-  });
+        p(options).then((doc) => {
+            // support suppressing of navigation since there is no dom available (page resolved with empty document)
+            if (doc) {
+                // if page is a modal, show as modal window
+                if (p.type === "modal") {
+                    // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
+                    _.defer(presentModal, doc);
+                }
+                else {
+                    // navigate
+                    // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
+                    _.defer(cleanNavigate, doc, replace);
+                }
+            }
+            // resolve promise
+            resolve(doc);
+        }, (error) => {
+            // something went wrong during the page execution
+            // warn and set the status to 500
+            if (error instanceof Error) {
+                console.error(`There was an error in the page code. ${error}`);
+                // @ts-ignore
+                error.status = "500";
+            }
+            // try showing a status level error page if it exists
+            let statusLevelErrorTpls = defaults$1.templates.status;
+            let tpl = statusLevelErrorTpls[error.status];
+            if (tpl) {
+                showError(_.defaults({
+                    template: tpl,
+                }, error.response));
+                resolve(error);
+            }
+            else {
+                console.warn("No error handler present in the page or navigation default configurations.", error);
+                reject(error);
+            }
+        });
+    });
 }
-
 /**
  * Shows a modal. Closes the previous modal before showing a new modal.
  *
@@ -18896,18 +18820,18 @@ function navigate(page, options, replace) {
  * @return {Document}                           The created modal document
  */
 function presentModal(modal) {
-  let doc = modal; // assume a document object is passed
-  if (_.isString(modal)) {
-    // if a modal document string is passed
-    doc = Parser.dom(modal);
-  } else if (_.isPlainObject(modal)) {
-    // if a modal page configuration is passed
-    doc = Page.makeDom(modal);
-  }
-  navigationDocument.presentModal(doc);
-  return doc;
+    let doc = modal; // assume a document object is passed
+    if (_.isString(modal)) {
+        // if a modal document string is passed
+        doc = Parser.dom(modal);
+    }
+    else if (_.isPlainObject(modal)) {
+        // if a modal page configuration is passed
+        doc = Page.makeDom(modal);
+    }
+    navigationDocument.presentModal(doc);
+    return doc;
 }
-
 /**
  * Dismisses the current modal window.
  *
@@ -18915,9 +18839,8 @@ function presentModal(modal) {
  * @alias module:navigation.dismissModal
  */
 function dismissModal() {
-  navigationDocument.dismissModal();
+    navigationDocument.dismissModal();
 }
-
 /**
  * Clears the navigation stack.
  *
@@ -18925,10 +18848,9 @@ function dismissModal() {
  * @alias module:navigation.clear
  */
 function clear() {
-  loaderDoc = null;
-  navigationDocument.clear();
+    loaderDoc = null;
+    navigationDocument.clear();
 }
-
 /**
  * Pops the recent document or pops all document before the provided document.
  *
@@ -18937,14 +18859,14 @@ function clear() {
  *
  * @param  {Document} [doc]     The document until which we need to pop.
  */
-function pop(doc) {
-  if (doc instanceof Document) {
-    _.defer(() => navigationDocument.popToDocument(doc));
-  } else {
-    _.defer(() => navigationDocument.popDocument());
-  }
+function pop(doc = null) {
+    if (doc instanceof Document) {
+        _.defer(() => navigationDocument.popToDocument(doc));
+    }
+    else {
+        _.defer(() => navigationDocument.popDocument());
+    }
 }
-
 /**
  * Goes back in history.
  *
@@ -18952,11 +18874,10 @@ function pop(doc) {
  * @alias module:navigation.back
  */
 function back() {
-  if (getLastDocumentFromStack()) {
-    pop();
-  }
+    if (getLastDocumentFromStack()) {
+        pop();
+    }
 }
-
 /**
  * Removes the current active document from the stack.
  *
@@ -18964,10 +18885,9 @@ function back() {
  * @alias module:navigation.removeActiveDocument
  */
 function removeActiveDocument() {
-  let doc = getActiveDocument();
-  doc && navigationDocument.removeDocument(doc);
+    let doc = getActiveDocument();
+    doc && navigationDocument.removeDocument(doc);
 }
-
 /**
  * A minimalistic Navigation library for Apple TV applications
  *
@@ -18977,38 +18897,38 @@ function removeActiveDocument() {
  *
  */
 var Navigation = {
-  /**
-   * Returns the topmost document from the navigation stack.
-   * @return {Document} TVML Document
-   */
-  get currentDocument() {
-    return getLastDocumentFromStack();
-  },
-  set currentDocument(doc) {},
-  /**
-   * Returns the current active document presented on the UI.
-   *
-   * Note: This is just a wrapper to the TVMLKit JS [getActiveDocument]{@linkcode https://developer.apple.com/documentation/tvmljs/1627314-getactivedocument} method.
-   * @return {Document} TVML Document
-   */
-  get activeDocument() {
-    return getActiveDocument();
-  },
-  set activeDocument(doc) {},
-  setOptions: setOptions$2,
-  navigate: navigate,
-  navigateToMenuPage: navigateToMenuPage,
-  getLoaderDoc: getLoaderDoc,
-  getErrorDoc: getErrorDoc,
-  showLoading: showLoading,
-  showError: showError,
-  presentModal: presentModal,
-  dismissModal: dismissModal,
-  clear: clear,
-  back: back,
-  pop: pop,
-  removeActiveDocument: removeActiveDocument,
-  replaceDocument: replaceDocument,
+    /**
+     * Returns the topmost document from the navigation stack.
+     * @return {Document} TVML Document
+     */
+    get currentDocument() {
+        return getLastDocumentFromStack();
+    },
+    set currentDocument(doc) { },
+    /**
+     * Returns the current active document presented on the UI.
+     *
+     * Note: This is just a wrapper to the TVMLKit JS [getActiveDocument]{@linkcode https://developer.apple.com/documentation/tvmljs/1627314-getactivedocument} method.
+     * @return {Document} TVML Document
+     */
+    get activeDocument() {
+        return getActiveDocument();
+    },
+    set activeDocument(doc) { },
+    setOptions: setOptions$2,
+    navigate: navigate,
+    navigateToMenuPage: navigateToMenuPage,
+    getLoaderDoc: getLoaderDoc,
+    getErrorDoc: getErrorDoc,
+    showLoading: showLoading,
+    showError: showError,
+    presentModal: presentModal,
+    dismissModal: dismissModal,
+    clear: clear,
+    back: back,
+    pop: pop,
+    removeActiveDocument: removeActiveDocument,
+    replaceDocument: replaceDocument,
 };
 
 // element level attribute that will be used for link to another pages
@@ -19017,7 +18937,6 @@ const hrefOptionsAttribute = "data-href-page-options";
 const hrefPageReplaceAttribute = "data-href-page-replace";
 const modalCloseBtnAttribute = "data-alert-dissmiss";
 const menuItemReloadAttribute = "reloadOnSelect";
-
 /**
  * Page level default handlers.
  *
@@ -19025,130 +18944,113 @@ const menuItemReloadAttribute = "reloadOnSelect";
  * @type {Object<Object<Function>>}
  */
 let handlers$1 = {
-  /**
-   * All the handlers associated to the select event.
-   * @type {Object}
-   */
-  select: {
     /**
-     * A handler to allow declaring anchors to other pages in the TVML templates.
-     *
-     * @example <caption>A typical usage would be something like:</caption>
-     *     <TVML TEMPLATE>
-     *         ...
-     *
-     *         <lockup data-href-page="details" data-href-page-options="{id: 'MOVIE_ID'}">
-     *             ...
-     *         </lockup>
-     *
-     *         ...
-     *     </END TEMPLATE>
-     *     which will navigate to the details page with the provided options object
-     *
-     * @private
-     * @param  {Event} e    The event passed while this handler is invoked.
+     * All the handlers associated to the select event.
+     * @type {Object}
      */
-    onLinkClick(e) {
-      let element = e.target;
-      let page = element.getAttribute(hrefAttribute);
-      let replace = element.getAttribute(hrefPageReplaceAttribute);
-
-      if (!page) return;
-
-      let options = element.getAttribute(hrefOptionsAttribute);
-      options = options || "{}";
-
-      // try to make the options object
-      try {
-        options = JSON.parse(options);
-      } catch (ex) {
-        console.warn(
-          `Invalid value for the page options (${hrefOptionsAttribute}=${options}) in the template.`
-        );
-        options = {};
-      }
-
-      Navigation.navigate(page, options, replace); // perform navigation
-    },
-    /**
-     * A handler that will allow declaring modal dismiss button in the TVML alert templates.
-     *
-     * @example <caption>A typical usage would be something like:</caption>
-     *
-     *          <TVML ALERT TEMPLATE>
-     *
-     *              ...
-     *
-     *              <button data-alert-dissmiss="close">
-     *                  <text>Cancel</text>
-     *              </button>
-     *
-     *              ...
-     *
-     *          </END TEMPLATE>
-     *
-     * @private
-     * @param  {Event} e    The event passed while this handler was invoked
-     */
-    onModalCloseBtnClick(e) {
-      let element = e.target;
-      let closeBtn = element.getAttribute(modalCloseBtnAttribute);
-
-      if (closeBtn) {
-        console.log(
-          "close button clicked within the modal, dismissing modal..."
-        );
-        Navigation.dismissModal();
-      }
-    },
-    /**
-     * Handler for menu navigation
-     *
-     * @private
-     * @param  {Event} e    The event passed while this handler was invoked
-     */
-    onMenuItemSelect(e) {
-      let element = e.target;
-      let menuId = element.getAttribute("id");
-      let elementType = element.nodeName.toLowerCase();
-      let page = element.page;
-
-      if (elementType === "menuitem") {
-        // no need to proceed if the page is already loaded or there is no page definition present
-        if (
-          (!element.pageDoc || element.getAttribute(menuItemReloadAttribute)) &&
-          page
-        ) {
-          // set a loading message intially to the menuitem
-          Menu.setDocument(
-            Navigation.getLoaderDoc(Menu.getLoadingMessage()),
-            menuId
-          );
-          // load the page
-          page().then(
-            (doc) => {
-              // if there is a document loaded, assign it to the menuitem
-              if (doc) {
-                // assign the pageDoc to disable reload everytime
-                element.pageDoc = doc;
-                Menu.setDocument(doc, menuId);
-              }
-              // dissmiss any open modals
-              Navigation.dismissModal();
-            },
-            (error) => {
-              // if there was an error loading the page, set an error page to the menu item
-              Menu.setDocument(Navigation.getErrorDoc(error), menuId);
-              // dissmiss any open modals
-              Navigation.dismissModal();
+    select: {
+        /**
+         * A handler to allow declaring anchors to other pages in the TVML templates.
+         *
+         * @example <caption>A typical usage would be something like:</caption>
+         *     <TVML TEMPLATE>
+         *         ...
+         *
+         *         <lockup data-href-page="details" data-href-page-options="{id: 'MOVIE_ID'}">
+         *             ...
+         *         </lockup>
+         *
+         *         ...
+         *     </END TEMPLATE>
+         *     which will navigate to the details page with the provided options object
+         *
+         * @private
+         * @param  {Event} e    The event passed while this handler is invoked.
+         */
+        onLinkClick(e) {
+            let element = e.target;
+            let page = element.getAttribute(hrefAttribute);
+            let replace = element.getAttribute(hrefPageReplaceAttribute);
+            if (!page)
+                return;
+            let options = element.getAttribute(hrefOptionsAttribute);
+            options = options || "{}";
+            // try to make the options object
+            try {
+                options = JSON.parse(options);
             }
-          );
-        }
-      }
+            catch (ex) {
+                console.warn(`Invalid value for the page options (${hrefOptionsAttribute}=${options}) in the template.`);
+                options = {};
+            }
+            Navigation.navigate(page, options, replace); // perform navigation
+        },
+        /**
+         * A handler that will allow declaring modal dismiss button in the TVML alert templates.
+         *
+         * @example <caption>A typical usage would be something like:</caption>
+         *
+         *          <TVML ALERT TEMPLATE>
+         *
+         *              ...
+         *
+         *              <button data-alert-dissmiss="close">
+         *                  <text>Cancel</text>
+         *              </button>
+         *
+         *              ...
+         *
+         *          </END TEMPLATE>
+         *
+         * @private
+         * @param  {Event} e    The event passed while this handler was invoked
+         */
+        onModalCloseBtnClick(e) {
+            let element = e.target;
+            let closeBtn = element.getAttribute(modalCloseBtnAttribute);
+            if (closeBtn) {
+                console.log("close button clicked within the modal, dismissing modal...");
+                Navigation.dismissModal();
+            }
+        },
+        /**
+         * Handler for menu navigation
+         *
+         * @private
+         * @param  {Event} e    The event passed while this handler was invoked
+         */
+        onMenuItemSelect(e) {
+            let element = e.target;
+            let menuId = element.getAttribute("id");
+            let elementType = element.nodeName.toLowerCase();
+            let page = element.page;
+            if (elementType === "menuitem") {
+                // no need to proceed if the page is already loaded or there is no page definition present
+                if ((!element.pageDoc || element.getAttribute(menuItemReloadAttribute)) &&
+                    page) {
+                    // set a loading message intially to the menuitem
+                    Menu.setDocument(Navigation.getLoaderDoc(Menu.getLoadingMessage()), menuId);
+                    // load the page
+                    page().then((doc) => {
+                        // if there is a document loaded, assign it to the menuitem
+                        if (doc) {
+                            // assign the pageDoc to disable reload everytime
+                            element.pageDoc = doc;
+                            Menu.setDocument(doc, menuId);
+                        }
+                        // dissmiss any open modals
+                        Navigation.dismissModal();
+                    }, (error) => {
+                        // if there was an error loading the page, set an error page to the menu item
+                        Menu.setDocument(Navigation.getErrorDoc(error), menuId);
+                        // dissmiss any open modals
+                        Navigation.dismissModal();
+                    });
+                }
+            }
+        },
     },
-  },
 };
-
 /**
  * Sets the default handlers options
  *
@@ -19158,11 +19060,10 @@ let handlers$1 = {
  * @param {Object} cfg The configuration object {defaults}
  */
 function setOptions$1(cfg = {}) {
-  console.log("setting handler options...", cfg);
-  // override the default options
-  _.defaultsDeep(handlers$1, cfg.handlers);
+    console.log("setting handler options...", cfg);
+    // override the default options
+    _.defaultsDeep(handlers$1, cfg.handlers);
 }
-
 /**
  * Iterates over the events configuration and add event listeners to the document.
  *
@@ -19187,48 +19088,40 @@ function setOptions$1(cfg = {}) {
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
 function setListeners(doc, cfg = {}, add = true) {
-  if (!doc || !(doc instanceof Document)) {
-    return;
-  }
-
-  let listenerFn = doc.addEventListener;
-  if (!add) {
-    listenerFn = doc.removeEventListener;
-  }
-  if (_.isObject(cfg.events)) {
-    let events = cfg.events;
-
-    _.each(events, (fns, e) => {
-      let [ev, selector] = e.split(" ");
-      let elements = null;
-      if (!_.isArray(fns)) {
-        // support list of event handlers
-        fns = [fns];
-      }
-      if (selector) {
-        selector = e.substring(e.indexOf(" ") + 1); // everything after space
-        elements = _.attempt(() => doc.querySelectorAll(selector)); // catch any errors while document selection
-      } else {
-        elements = [doc];
-      }
-      elements = _.isError(elements) ? [] : elements;
-      _.each(fns, (fn) => {
-        fn = _.isString(fn) ? cfg[fn] : fn; // assume the function to be present on the page configuration obeject
-        if (_.isFunction(fn)) {
-          console.log(
-            (add ? "adding" : "removing") + " event on documents...",
-            ev,
-            elements
-          );
-          _.each(elements, (el) =>
-            listenerFn.call(el, ev, (e) => fn.call(cfg, e))
-          ); // bind to the original configuration object
-        }
-      });
-    });
-  }
+    if (!doc || !(doc instanceof Document)) {
+        return;
+    }
+    let listenerFn = doc.addEventListener;
+    if (!add) {
+        listenerFn = doc.removeEventListener;
+    }
+    if (_.isObject(cfg.events)) {
+        let events = cfg.events;
+        _.each(events, (fns, e) => {
+            let [ev, selector] = e.split(" ");
+            let elements = null;
+            if (!_.isArray(fns)) {
+                // support list of event handlers
+                fns = [fns];
+            }
+            if (selector) {
+                selector = e.substring(e.indexOf(" ") + 1); // everything after space
+                elements = _.attempt(() => doc.querySelectorAll(selector)); // catch any errors while document selection
+            }
+            else {
+                elements = [doc];
+            }
+            elements = _.isError(elements) ? [] : elements;
+            _.each(fns, (fn) => {
+                fn = _.isString(fn) ? cfg[fn] : fn; // assume the function to be present on the page configuration obeject
+                if (_.isFunction(fn)) {
+                    console.log((add ? "adding" : "removing") + " event on documents...", ev, elements);
+                    _.each(elements, (el) => listenerFn.call(el, ev, (e) => fn.call(cfg, e))); // bind to the original configuration object
+                }
+            });
+        });
+    }
 }
-
 /**
  * Iterates over the events configuration and add event listeners to the document.
  *
@@ -19254,9 +19147,8 @@ function setListeners(doc, cfg = {}, add = true) {
  * @param {Object} cfg              The page object configuration.
  */
 function addListeners(doc, cfg) {
-  setListeners(doc, cfg, true);
+    setListeners(doc, cfg, true);
 }
-
 /**
  * Iterates over the events configuration and remove event listeners from document.
  *
@@ -19281,9 +19173,8 @@ function addListeners(doc, cfg) {
  * @param {Object} cfg              The page object configuration.
  */
 function removeListeners(doc, cfg) {
-  setListeners(doc, cfg, false);
+    setListeners(doc, cfg, false);
 }
-
 /**
  * Iterates over the list of page level default handlers and set/unset listeners on the provided document.
  *
@@ -19293,23 +19184,20 @@ function removeListeners(doc, cfg) {
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
 function setDefaultHandlers(doc, add = true) {
-  if (!doc || !(doc instanceof Document)) {
-    return;
-  }
-
-  let listenerFn = doc.addEventListener;
-  if (!add) {
-    listenerFn = doc.removeEventListener;
-  }
-
-  // iterate over all the handlers and add it as an event listener on the doc
-  for (let name in handlers$1) {
-    for (let key in handlers$1[name]) {
-      listenerFn.call(doc, name, handlers$1[name][key]);
+    if (!doc || !(doc instanceof Document)) {
+        return;
     }
-  }
+    let listenerFn = doc.addEventListener;
+    if (!add) {
+        listenerFn = doc.removeEventListener;
+    }
+    // iterate over all the handlers and add it as an event listener on the doc
+    for (let name in handlers$1) {
+        for (let key in handlers$1[name]) {
+            listenerFn.call(doc, name, handlers$1[name][key]);
+        }
+    }
 }
-
 /**
  * Syntactical sugar to {setDefaultHandlers} with add=true
  *
@@ -19318,9 +19206,8 @@ function setDefaultHandlers(doc, add = true) {
  * @param {Document} doc        The document to add the listeners on.
  */
 function addDefaultHandlers(doc) {
-  setDefaultHandlers(doc, true);
+    setDefaultHandlers(doc, true);
 }
-
 /**
  * Syntactical sugar to {setDefaultHandlers} with add=false
  *
@@ -19329,9 +19216,8 @@ function addDefaultHandlers(doc) {
  * @param {Document} doc        The document to add the listeners on.
  */
 function removeDefaultHandlers(doc) {
-  setDefaultHandlers(doc, false);
+    setDefaultHandlers(doc, false);
 }
-
 /**
  * Sets/unsets the event handlers as per the event configuration.
  * Also adds/removes the [default page level handlers]{@link handlers}.
@@ -19343,15 +19229,15 @@ function removeDefaultHandlers(doc) {
  * @param {Boolean} [add=true]      Whether to add or remove the handlers
  */
 function setHandlers(doc, cfg, add = true) {
-  if (add) {
-    addDefaultHandlers(doc);
-    addListeners(doc, cfg);
-  } else {
-    removeDefaultHandlers(doc);
-    removeListeners(doc, cfg);
-  }
+    if (add) {
+        addDefaultHandlers(doc);
+        addListeners(doc, cfg);
+    }
+    else {
+        removeDefaultHandlers(doc);
+        removeListeners(doc, cfg);
+    }
 }
-
 /**
  * Sets the event handlers as per the event configuration.
  * Also adds the [default page level handlers]{@link handlers}.
@@ -19363,9 +19249,8 @@ function setHandlers(doc, cfg, add = true) {
  * @param {Obejct}  cfg             Page configuration object
  */
 function addHandlers(doc, cfg) {
-  setHandlers(doc, cfg, true);
+    setHandlers(doc, cfg, true);
 }
-
 /**
  * Unset the event handlers as per the event configuration.
  * Also removes the [default page level handlers]{@link handlers}.
@@ -19377,9 +19262,8 @@ function addHandlers(doc, cfg) {
  * @param {Obejct}  cfg             Page configuration object
  */
 function removeHandlers(doc, cfg) {
-  setHandlers(doc, cfg, false);
+    setHandlers(doc, cfg, false);
 }
-
 /**
  * A minimalistic Event handling library for Apple TV applications
  *
@@ -19389,11 +19273,11 @@ function removeHandlers(doc, cfg) {
  *
  */
 var Handler = {
-  setOptions: setOptions$1,
-  addListeners: addListeners,
-  removeListeners: removeListeners,
-  addAll: addHandlers,
-  removeAll: removeHandlers,
+    setOptions: setOptions$1,
+    addListeners: addListeners,
+    removeListeners: removeListeners,
+    addAll: addHandlers,
+    removeAll: removeHandlers,
 };
 
 /**
@@ -19403,7 +19287,6 @@ var Handler = {
  * @type {Object}
  */
 let pages = {};
-
 /**
  * Page level defaults that needs to be overridden.
  *
@@ -19411,40 +19294,39 @@ let pages = {};
  * @type {Object}
  */
 const defaults = {
-  /**
-   * Default styles (override with the required style)
-   * @type {String}
-   */
-  style: "",
-  /**
-   * Template functin that takes data and returns the TVML template string.
-   *
-   * @param  {Object} data    The data associated with the template
-   * @return {string}         The final TVML template string.
-   */
-  template(data) {
-    console.warn("No template exists!");
-    return "";
-  },
-  /**
-   * Data transformation function that will be invoked before passing the data to the template function.
-   *
-   * @param  {Object} d   The data object
-   * @return {Obect}      The transformed data
-   */
-  data(d) {
-    return d;
-  },
-  /**
-   * Default options that will be passed to the ajax options
-   *
-   * @type {Object}
-   */
-  options: {
-    responseType: "json",
-  },
+    /**
+     * Default styles (override with the required style)
+     * @type {String}
+     */
+    style: "",
+    /**
+     * Template functin that takes data and returns the TVML template string.
+     *
+     * @param  {Object} data    The data associated with the template
+     * @return {string}         The final TVML template string.
+     */
+    template(data) {
+        console.warn("No template exists!");
+        return "";
+    },
+    /**
+     * Data transformation function that will be invoked before passing the data to the template function.
+     *
+     * @param  {Object} d   The data object
+     * @return {Obect}      The transformed data
+     */
+    data(d) {
+        return d;
+    },
+    /**
+     * Default options that will be passed to the ajax options
+     *
+     * @type {Object}
+     */
+    options: {
+        responseType: "json",
+    },
 };
-
 /**
  * Sets the default options for the page.
  *
@@ -19454,11 +19336,10 @@ const defaults = {
  * @param {Object} cfg The configuration object {defaults}
  */
 function setOptions(cfg = {}) {
-  console.log("setting default page options...", cfg);
-  // override the default options
-  _.assign(defaults, cfg);
+    console.log("setting default page options...", cfg);
+    // override the default options
+    _.assign(defaults, cfg);
 }
-
 /**
  * Adds style to a document.
  *
@@ -19470,22 +19351,20 @@ function setOptions(cfg = {}) {
  * @param  {Document} doc   The document to add styles on
  */
 function appendStyle(style, doc) {
-  if (!_.isString(style) || !doc) {
-    console.log("invalid document or style string...", style, doc);
-    return;
-  }
-  let docEl = doc.getElementsByTagName("document").item(0);
-  let styleString = ["<style>", style, "</style>"].join("");
-  let headTag = doc.getElementsByTagName("head");
-
-  headTag = headTag && headTag.item(0);
-  if (!headTag) {
-    headTag = doc.createElement("head");
-    docEl.insertBefore(headTag, docEl.firstChild);
-  }
-  headTag.innerHTML = styleString;
+    if (!_.isString(style) || !doc) {
+        console.log("invalid document or style string...", style, doc);
+        return;
+    }
+    let docEl = doc.getElementsByTagName("document").item(0);
+    let styleString = ["<style>", style, "</style>"].join("");
+    let headTag = doc.getElementsByTagName("head");
+    headTag = headTag && headTag.item(0);
+    if (!headTag) {
+        headTag = doc.createElement("head");
+        docEl.insertBefore(headTag, docEl.firstChild);
+    }
+    headTag.innerHTML = styleString;
 }
-
 /**
  * Prepares a document by adding styles and event handlers.
  *
@@ -19496,20 +19375,18 @@ function appendStyle(style, doc) {
  * @return {Document}           The document passed
  */
 function prepareDom(doc, cfg = {}) {
-  if (!(doc instanceof Document)) {
-    console.warn("Cannnot prepare, the provided element is not a document.");
-    return;
-  }
-  // apply defaults
-  _.defaults(cfg, defaults);
-  // append any default styles
-  appendStyle(cfg.style, doc);
-  // attach event handlers
-  Handler.addAll(doc, cfg);
-
-  return doc;
+    if (!(doc instanceof Document)) {
+        console.warn("Cannnot prepare, the provided element is not a document.");
+        return;
+    }
+    // apply defaults
+    _.defaults(cfg, defaults);
+    // append any default styles
+    appendStyle(cfg.style, doc);
+    // attach event handlers
+    Handler.addAll(doc, cfg);
+    return doc;
 }
-
 /**
  * A helper method that calls the data method to transform the data.
  * It then creates a dom from the provided template and the final data.
@@ -19521,27 +19398,22 @@ function prepareDom(doc, cfg = {}) {
  * @param  {Object} response        The data object
  * @return {Document}               The newly created document
  */
-function makeDom(cfg, response) {
-  // apply defaults
-  _.defaults(cfg, defaults);
-  // create Document
-  let doc = Parser.dom(
-    cfg.template,
-    _.isPlainObject(cfg.data) ? cfg.data : cfg.data(response)
-  );
-  // prepare the Document
-  prepareDom(doc, cfg);
-  // call the after ready method if defined in the configuration
-  if (_.isFunction(cfg.afterReady)) {
-    console.log("calling afterReady method...");
-    cfg.afterReady(doc);
-  }
-  // cache cfg at the document level
-  doc.page = cfg;
-
-  return doc;
+function makeDom(cfg, response = []) {
+    // apply defaults
+    _.defaults(cfg, defaults);
+    // create Document
+    let doc = Parser.dom(cfg.template, _.isPlainObject(cfg.data) ? cfg.data : cfg.data(response));
+    // prepare the Document
+    prepareDom(doc, cfg);
+    // call the after ready method if defined in the configuration
+    if (_.isFunction(cfg.afterReady)) {
+        console.log("calling afterReady method...");
+        cfg.afterReady(doc);
+    }
+    // cache cfg at the document level
+    doc.page = cfg;
+    return doc;
 }
-
 /**
  * Generated a page function which returns a promise after invocation.
  *
@@ -19551,52 +19423,43 @@ function makeDom(cfg, response) {
  * @return {Function}       A function that returns promise upon execution
  */
 function makePage(cfg) {
-  return (options) => {
-    _.defaultsDeep(cfg, defaults);
-
-    console.log("making page... options:", cfg);
-
-    // return a promise that resolves after completion of the ajax request
-    // if no ready method or url configuration exist, the promise is resolved immediately and the resultant dom is returned
-    return new Promise((resolve, reject) => {
-      if (_.isFunction(cfg.ready)) {
-        // if present, call the ready function
-        console.log("calling page ready... options:", options);
-        // resolves promise with a doc if there is a response param passed
-        // if the response param is null/falsy value, resolve with null (usefull for catching and supressing any navigation later)
-        cfg.ready(
-          options,
-          (response) =>
-            resolve(
-              response || _.isUndefined(response)
-                ? makeDom(cfg, response)
-                : null
-            ),
-          reject
-        );
-      } else if (cfg.url) {
-        // make ajax request if a url is provided
-        ajax.get(cfg.url, cfg.options).then(
-          (xhr) => {
-            resolve(makeDom(cfg, xhr.response));
-          },
-          (xhr) => {
-            // if present, call the error handler
-            if (_.isFunction(cfg.onError)) {
-              cfg.onError(xhr.response, xhr);
-            } else {
-              reject(xhr);
+    return (options) => {
+        _.defaultsDeep(cfg, defaults);
+        console.log("making page... options:", cfg);
+        // return a promise that resolves after completion of the ajax request
+        // if no ready method or url configuration exist, the promise is resolved immediately and the resultant dom is returned
+        return new Promise((resolve, reject) => {
+            if (_.isFunction(cfg.ready)) {
+                // if present, call the ready function
+                console.log("calling page ready... options:", options);
+                // resolves promise with a doc if there is a response param passed
+                // if the response param is null/falsy value, resolve with null (usefull for catching and supressing any navigation later)
+                cfg.ready(options, (response) => resolve(response || _.isUndefined(response)
+                    ? makeDom(cfg, response)
+                    : null), reject);
             }
-          }
-        );
-      } else {
-        // no url/ready method provided, resolve the promise immediately
-        resolve(makeDom(cfg));
-      }
-    });
-  };
+            else if (cfg.url) {
+                // make ajax request if a url is provided
+                // @ts-ignore
+                ajax.get(cfg.url, cfg.options).then((xhr) => {
+                    resolve(makeDom(cfg, xhr.response));
+                }, (xhr) => {
+                    // if present, call the error handler
+                    if (_.isFunction(cfg.onError)) {
+                        cfg.onError(xhr.response, xhr);
+                    }
+                    else {
+                        reject(xhr);
+                    }
+                });
+            }
+            else {
+                // no url/ready method provided, resolve the promise immediately
+                resolve(makeDom(cfg));
+            }
+        });
+    };
 }
-
 /**
  * A minimalistic page creation library for Apple TV applications
  *
@@ -19606,311 +19469,278 @@ function makePage(cfg) {
  *
  */
 var Page = {
-  setOptions: setOptions,
-  /**
-   * Create a page that can be later used for navigation.
-   *
-   * @example
-   * const homepage = create({
-   *     name: 'homepage',
-   *     url: 'path/to/server/api/',
-   *     template(data) {
-   *         // return a string here (preferably TVML)
-   *     },
-   *     data(d) {
-   *         // do your data transformations here and return the final data
-   *         // the transformed data will be passed on to your template function
-   *     },
-   *     options: {
-   *         // ajax options
-   *     },
-   *     events: {
-   *         // event maps and handlers on the configuration object
-   *         'scroll': function(e) { // do the magic here },
-   *         'select': 'onTitleSelect'
-   *     },
-   *     onError(response, xhr) {
-   *         // perform the error handing
-   *     },
-   *     ready(options, resolve, reject) {
-   *         // call resolve with the data to render the provided template
-   *
-   *         // you may also call resolve with null/falsy value to suppress rendering,
-   *         // this is useful when you want full control of the page rendering
-   *
-   *         // reject is not preferred, but you may still call it
-   *
-   *         // any configuration options passed while calling the page method,
-   *         // will be carried over to ready method at runtime
-   *     },
-   *     afterReady(doc) {
-   *         // all your code that relies on a document object should go here
-   *     },
-   *     onTitleSelect(e) {
-   *         // do the magic here
-   *     }
-   * });
-   * homepage(options) -> promise that resolves to a document
-   *
-   * //(or if using the navigation class)
-   *
-   * Navigation.navigate('homepage') -> promise that resolves on navigation
-   *
-   * @param  {String|Object} name     Name of the page or the configuration options
-   * @param  {Object} cfg             Page configuration options
-   * @return {Function}               A function that returns promise upon execution
-   */
-  create(name, cfg) {
-    console.log("creating page... name:", name);
-
-    if (_.isObject(name)) {
-      cfg = name;
-      name = cfg.name;
-    }
-
-    _.assign(cfg, {
-      name: name,
-    });
-
-    if (!name || !_.isString(name)) {
-      console.warn(
-        "Creating page without a name, name based navigation will not be possible."
-      );
-    }
-
-    // warn in case the page already exists
-    if (pages[name]) {
-      console.warn(`The given page name ${name} already exists! Overriding...`);
-    }
-    let p = makePage(cfg);
-    // cache for later user
-    pages[name] = p;
-    // merge configurations on the page
-    // FIXME: failed with merging read-only property.
-    // _.assign(p, cfg);
-    // return the created page to allow chaining
-    return p;
-  },
-  /**
-   * Returns the previously created page from the cache.
-   *
-   * @example
-   * // create page
-   * ATV.Page.create('homepage', { page configurations });
-   * // later in the app
-   * const homepage = ATV.Page.get('homepage');
-   *
-   * @param  {string} name    Name of the previously created page
-   * @return {Page}           Page function
-   */
-  get(name) {
-    return pages[name];
-  },
-  prepareDom: prepareDom,
-  makeDom: makeDom,
+    setOptions: setOptions,
+    /**
+     * Create a page that can be later used for navigation.
+     *
+     * @example
+     * const homepage = create({
+     *     name: 'homepage',
+     *     url: 'path/to/server/api/',
+     *     template(data) {
+     *         // return a string here (preferably TVML)
+     *     },
+     *     data(d) {
+     *         // do your data transformations here and return the final data
+     *         // the transformed data will be passed on to your template function
+     *     },
+     *     options: {
+     *         // ajax options
+     *     },
+     *     events: {
+     *         // event maps and handlers on the configuration object
+     *         'scroll': function(e) { // do the magic here },
+     *         'select': 'onTitleSelect'
+     *     },
+     *     onError(response, xhr) {
+     *         // perform the error handing
+     *     },
+     *     ready(options, resolve, reject) {
+     *         // call resolve with the data to render the provided template
+     *
+     *         // you may also call resolve with null/falsy value to suppress rendering,
+     *         // this is useful when you want full control of the page rendering
+     *
+     *         // reject is not preferred, but you may still call it
+     *
+     *         // any configuration options passed while calling the page method,
+     *         // will be carried over to ready method at runtime
+     *     },
+     *     afterReady(doc) {
+     *         // all your code that relies on a document object should go here
+     *     },
+     *     onTitleSelect(e) {
+     *         // do the magic here
+     *     }
+     * });
+     * homepage(options) -> promise that resolves to a document
+     *
+     * //(or if using the navigation class)
+     *
+     * Navigation.navigate('homepage') -> promise that resolves on navigation
+     *
+     * @param  {String|Object} name     Name of the page or the configuration options
+     * @param  {Object} cfg             Page configuration options
+     * @return {Function}               A function that returns promise upon execution
+     */
+    create(name, cfg) {
+        console.log("creating page... name:", name);
+        if (_.isObject(name)) {
+            cfg = name;
+            name = cfg.name;
+        }
+        _.assign(cfg, {
+            name: name,
+        });
+        if (!name || !_.isString(name)) {
+            console.warn("Creating page without a name, name based navigation will not be possible.");
+        }
+        // warn in case the page already exists
+        if (pages[name]) {
+            console.warn(`The given page name ${name} already exists! Overriding...`);
+        }
+        let p = makePage(cfg);
+        // cache for later user
+        pages[name] = p;
+        // merge configurations on the page
+        // FIXME: failed with merging read-only property.
+        // _.assign(p, cfg);
+        // return the created page to allow chaining
+        return p;
+    },
+    /**
+     * Returns the previously created page from the cache.
+     *
+     * @example
+     * // create page
+     * ATV.Page.create('homepage', { page configurations });
+     * // later in the app
+     * const homepage = ATV.Page.get('homepage');
+     *
+     * @param  {string} name    Name of the previously created page
+     * @return {Page}           Page function
+     */
+    get(name) {
+        return pages[name];
+    },
+    prepareDom: prepareDom,
+    makeDom: makeDom,
 };
 
+let Settings = {};
 const lib = {
-  /**
-   * Sets a value for the given key in the localStorage (supports storing object values).
-   * Uses [LZString Compression]{@link external:LZString} to store significantly large amount of data.
-   *
-   * @inner
-   * @alias module:settings.set
-   *
-   * @param {String} key 				The key
-   * @param {Object|String} val 		The value to store
-   */
-  set(key, val) {
-    // convert all values to string for proper compression
-    if (!_.isUndefined(val)) {
-      val = JSON.stringify(val);
-      console.log(`Setting key: ${key} with value: ${val}`);
-      localStorage.setItem(key, LZString.compress(val));
-    } else {
-      this.remove(key);
-    }
-  },
-  /**
-   * Returns a value for the specified key
-   *
-   * @inner
-   * @alias module:settings.get
-   *
-   * @param  {String} key 		The key
-   * @return {Object|String}     	The stored value
-   */
-  get(key) {
-    let item = localStorage.getItem(key);
-    let val;
-
-    if (!_.isUndefined(item)) {
-      item = LZString.decompress(item);
-    }
-    try {
-      val = JSON.parse(item);
-    } catch (ex) {
-      val = item;
-    }
-    return val;
-  },
-  /**
-   * Removes the given key(s) from the localStorage.
-   *
-   * @inner
-   * @alias module:settings.remove
-   *
-   * @param  {String|Array} keys 		The key(s) to remove.
-   */
-  remove(keys) {
-    if (!_.isArray(keys)) {
-      keys = [keys];
-    }
-    _.each(keys, (key) => {
-      console.log(`Unsetting key: ${key}`);
-      localStorage.removeItem(key);
-    });
-  },
+    /**
+     * Sets a value for the given key in the localStorage (supports storing object values).
+     * Uses [LZString Compression]{@link external:LZString} to store significantly large amount of data.
+     *
+     * @inner
+     * @alias module:settings.set
+     *
+     * @param {String} key 				The key
+     * @param {Object|String} val 		The value to store
+     */
+    set(key, val) {
+        // convert all values to string for proper compression
+        if (!_.isUndefined(val)) {
+            val = JSON.stringify(val);
+            console.log(`Setting key: ${key} with value: ${val}`);
+            localStorage.setItem(key, LZString.compress(val));
+        }
+        else {
+            this.remove(key);
+        }
+    },
+    /**
+     * Returns a value for the specified key
+     *
+     * @inner
+     * @alias module:settings.get
+     *
+     * @param  {String} key 		The key
+     * @return {Object|String}     	The stored value
+     */
+    get(key) {
+        let item = localStorage.getItem(key);
+        let val;
+        if (!_.isUndefined(item)) {
+            item = LZString.decompress(item);
+        }
+        try {
+            val = JSON.parse(item);
+        }
+        catch (ex) {
+            val = item;
+        }
+        return val;
+    },
+    /**
+     * Removes the given key(s) from the localStorage.
+     *
+     * @inner
+     * @alias module:settings.remove
+     *
+     * @param  {String|Array} keys 		The key(s) to remove.
+     */
+    remove(keys) {
+        if (!_.isArray(keys)) {
+            keys = [keys];
+        }
+        _.each(keys, (key) => {
+            console.log(`Unsetting key: ${key}`);
+            localStorage.removeItem(key);
+        });
+    },
 };
-
 _.assign(Settings, lib);
 
-/**
- * A Settings class instance provides access settings information for Apple TV device.
- * @external Settings
- * @see https://developer.apple.com/documentation/tvmljs/settings
- */
-
-/**
- * LZ-based compression algorithm for JavaScript
- * @external LZString
- * @see https://github.com/pieroxy/lz-string/
- */
-
-/**
- * A wrapper for the Apple TV settings object that has getters and setters using localstorage.
- * The settings are persisted even on app exits and relaunch.
- *
- * @module settings
- * @extends external:Settings
- *
- * @author eMAD <emad.alam@yahoo.com>
- *
- */
-var Settings$1 = Settings;
-
 // external libraries
-
 // all supported configurations for each of the libraries
 const configMap = {
-  Ajax: [],
-  Parser: [],
-  Page: ["style"],
-  Navigation: ["menu", "templates"],
-  Handler: ["handlers"],
+    Ajax: [],
+    Parser: [],
+    Page: ["style"],
+    Navigation: ["menu", "templates"],
+    Handler: ["handlers"],
 };
-
 // indicate whether the application was started
 let started = false;
-
 // all libraries
 let libs = {
-  /**
-   * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
-   * @alias module:ATV._
-   */
-  _: _,
-  /**
-   * Internal alias to [lz-string compression]{@link https://github.com/pieroxy/lz-string/} library
-   * @alias module:ATV.LZString
-   */
-  LZString: LZString,
-  /**
-   * Ajax wrapper using Promises
-   * @alias module:ATV.Ajax
-   * @type {module:ajax}
-   */
-  Ajax: ajax,
-  /**
-   * Page level navigation methods.
-   * @alias module:ATV.Navigation
-   * @type {module:navigation}
-   */
-  Navigation: Navigation,
-  /**
-   * Page Creation
-   * @alias module:ATV.Page
-   * @type {module:page}
-   */
-  Page: Page,
-  /**
-   * A minimalistic parser wrapper using the builtin DOMParser
-   * @alias module:ATV.Parser
-   * @type {module:parser}
-   */
-  Parser: Parser,
-  /**
-   * Basic event handling including some default ones
-   * @alias module:ATV.Handler
-   * @type {module:handler}
-   */
-  Handler: Handler,
-  /**
-   * Apple TV settings object with some basic helpers
-   * @alias module:ATV.Settings
-   * @type {module:settings}
-   */
-  Settings: Settings$1,
-  /**
-   * TVML menu template creation with few utility methods
-   * @alias module:ATV.Menu
-   * @type {module:menu}
-   */
-  Menu: Menu,
-  /**
-   * Create a page that can be later used for navigation.
-   * This is an alias of ATV.Page.create
-   * @param  {String|Object} name     Name of the page or the configuration options
-   * @param  {Object} cfg             Page configuration options
-   * @return {Function}               A function that returns promise upon execution
-   */
-  createPage: Page.create,
-  /**
-   * Generates a menu from the configuration object.
-   * This is an alias of ATV.Menu.create
-   * @param  {Object} cfg 		Menu related configurations
-   * @return {Document}     		The created menu document
-   */
-  createMenu: Menu.create,
-  /**
-   * Navigates to the provided page if it exists in the list of available pages.
-   * This is an alias of ATV.Navigation.navigate
-   * @param  {String} page        Name of the previously created page.
-   * @param  {Object} options     The options that will be passed on to the page during runtime.
-   * @param  {Boolean} replace    Replace the previous page.
-   * @return {Promise}            Returns a Promise that resolves upon successful navigation.
-   */
-  navigateTo: Navigation.navigate,
-  /**
-   * Navigates to the menu page if it exists
-   * This is an alias of ATV.Navigation.navigateToMenuPage
-   * @return {Promise}      Returns a Promise that resolves upon successful navigation.
-   */
-  navigateToMenuPage: Navigation.navigateToMenuPage,
-  /**
-   * Shows a modal. Closes the previous modal before showing a new modal.
-   * This is an alias of ATV.Navigation.presentModal
-   * @param  {Document|String|Object} modal       The TVML string/document representation of the modal window or a configuration object to create modal from
-   * @return {Document}                           The created modal document
-   */
-  presentModal: Navigation.presentModal,
-  /**
-   * Dismisses the current modal window.
-   * This is an alias of ATV.Navigation.dismissModal
-   */
-  dismissModal: Navigation.dismissModal,
+    /**
+     * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
+     * @alias module:ATV._
+     */
+    _: _,
+    /**
+     * Internal alias to [lz-string compression]{@link https://github.com/pieroxy/lz-string/} library
+     * @alias module:ATV.LZString
+     */
+    LZString: LZString,
+    /**
+     * Ajax wrapper using Promises
+     * @alias module:ATV.Ajax
+     * @type {module:ajax}
+     */
+    Ajax: ajax,
+    /**
+     * Page level navigation methods.
+     * @alias module:ATV.Navigation
+     * @type {module:navigation}
+     */
+    Navigation: Navigation,
+    /**
+     * Page Creation
+     * @alias module:ATV.Page
+     * @type {module:page}
+     */
+    Page: Page,
+    /**
+     * A minimalistic parser wrapper using the builtin DOMParser
+     * @alias module:ATV.Parser
+     * @type {module:parser}
+     */
+    Parser: Parser,
+    /**
+     * Basic event handling including some default ones
+     * @alias module:ATV.Handler
+     * @type {module:handler}
+     */
+    Handler: Handler,
+    /**
+     * Apple TV settings object with some basic helpers
+     * @alias module:ATV.Settings
+     * @type {module:settings}
+     */
+    Settings: Settings,
+    /**
+     * TVML menu template creation with few utility methods
+     * @alias module:ATV.Menu
+     * @type {module:menu}
+     */
+    Menu: Menu,
+    /**
+     * Create a page that can be later used for navigation.
+     * This is an alias of ATV.Page.create
+     * @param  {String|Object} name     Name of the page or the configuration options
+     * @param  {Object} cfg             Page configuration options
+     * @return {Function}               A function that returns promise upon execution
+     */
+    createPage: Page.create,
+    /**
+     * Generates a menu from the configuration object.
+     * This is an alias of ATV.Menu.create
+     * @param  {Object} cfg 		Menu related configurations
+     * @return {Document}     		The created menu document
+     */
+    createMenu: Menu.create,
+    /**
+     * Navigates to the provided page if it exists in the list of available pages.
+     * This is an alias of ATV.Navigation.navigate
+     * @param  {String} page        Name of the previously created page.
+     * @param  {Object} options     The options that will be passed on to the page during runtime.
+     * @param  {Boolean} replace    Replace the previous page.
+     * @return {Promise}            Returns a Promise that resolves upon successful navigation.
+     */
+    navigateTo: Navigation.navigate,
+    /**
+     * Navigates to the menu page if it exists
+     * This is an alias of ATV.Navigation.navigateToMenuPage
+     * @return {Promise}      Returns a Promise that resolves upon successful navigation.
+     */
+    navigateToMenuPage: Navigation.navigateToMenuPage,
+    /**
+     * Shows a modal. Closes the previous modal before showing a new modal.
+     * This is an alias of ATV.Navigation.presentModal
+     * @param  {Document|String|Object} modal       The TVML string/document representation of the modal window or a configuration object to create modal from
+     * @return {Document}                           The created modal document
+     */
+    presentModal: Navigation.presentModal,
+    /**
+     * Dismisses the current modal window.
+     * This is an alias of ATV.Navigation.dismissModal
+     */
+    dismissModal: Navigation.dismissModal,
 };
-
 /**
  * Iterates over each libraries and call setOptions with the relevant options.
  *
@@ -19919,79 +19749,78 @@ let libs = {
  * @param  {Object} cfg 	All configuration options relevant to the libraries
  */
 function initLibraries(cfg = {}) {
-  _.each(configMap, (keys, libName) => {
-    let lib = libs[libName];
-    let options = {};
-    _.each(keys, (key) => (options[key] = cfg[key]));
-    lib.setOptions && lib.setOptions(options);
-  });
+    _.each(configMap, (keys, libName) => {
+        let lib = libs[libName];
+        let options = {};
+        _.each(keys, (key) => (options[key] = cfg[key]));
+        lib.setOptions && lib.setOptions(options);
+    });
 }
-
 // all supported Apple TV App level handlers
 const handlers = {
-  /**
-   * App launch event
-   *
-   * @event onLaunch
-   * @alias module:ATV#onLaunch
-   */
-  onLaunch(options = {}, fn) {
-    libs.launchOptions = options;
-    console.log("launching application...");
-    fn(options);
-  },
-  /**
-   * App error event
-   *
-   * @event onError
-   * @alias module:ATV#onError
-   */
-  onError(options = {}, fn) {
-    console.log("an error occurred in the application...");
-    fn(options);
-  },
-  /**
-   * App resume event
-   *
-   * @event onResume
-   * @alias module:ATV#onResume
-   */
-  onResume(options = {}, fn) {
-    console.log("resuming application...");
-    fn(options);
-  },
-  /**
-   * App suspend event
-   *
-   * @event onSuspend
-   * @alias module:ATV#onSuspend
-   */
-  onSuspend(options = {}, fn) {
-    console.log("suspending application...");
-    fn(options);
-  },
-  /**
-   * App exit event
-   *
-   * @event onExit
-   * @alias module:ATV#onExit
-   */
-  onExit(options = {}, fn) {
-    console.log("exiting application...");
-    fn(options);
-  },
-  /**
-   * App reload event
-   *
-   * @event onReload
-   * @alias module:ATV#onReload
-   */
-  onReload(options = {}, fn) {
-    console.log("reloading application...");
-    fn(options);
-  },
+    /**
+     * App launch event
+     *
+     * @event onLaunch
+     * @alias module:ATV#onLaunch
+     */
+    onLaunch(options = {}, fn) {
+        // @ts-ignore
+        libs.launchOptions = options;
+        console.log("launching application...");
+        fn(options);
+    },
+    /**
+     * App error event
+     *
+     * @event onError
+     * @alias module:ATV#onError
+     */
+    onError(options = {}, fn) {
+        console.log("an error occurred in the application...");
+        fn(options);
+    },
+    /**
+     * App resume event
+     *
+     * @event onResume
+     * @alias module:ATV#onResume
+     */
+    onResume(options = {}, fn) {
+        console.log("resuming application...");
+        fn(options);
+    },
+    /**
+     * App suspend event
+     *
+     * @event onSuspend
+     * @alias module:ATV#onSuspend
+     */
+    onSuspend(options = {}, fn) {
+        console.log("suspending application...");
+        fn(options);
+    },
+    /**
+     * App exit event
+     *
+     * @event onExit
+     * @alias module:ATV#onExit
+     */
+    onExit(options = {}, fn) {
+        console.log("exiting application...");
+        fn(options);
+    },
+    /**
+     * App reload event
+     *
+     * @event onReload
+     * @alias module:ATV#onReload
+     */
+    onReload(options = {}, fn) {
+        console.log("reloading application...");
+        fn(options);
+    },
 };
-
 /**
  * Iterates over each supported handler types and attach it on the Apple TV App object.
  *
@@ -20000,17 +19829,8 @@ const handlers = {
  * @param  {Object} cfg 	All configuration options relevant to the App.
  */
 function initAppHandlers(cfg = {}) {
-  _.each(
-    handlers,
-    (handler, name) =>
-      (App[name] = _.partial(
-        handler,
-        _,
-        _.isFunction(cfg[name]) ? cfg[name] : _.noop
-      ))
-  );
+    _.each(handlers, (handler, name) => (App[name] = _.partial(handler, _, _.isFunction(cfg[name]) ? cfg[name] : _.noop)));
 }
-
 /**
  * Starts the Apple TV application after applying the relevant configuration options
  *
@@ -20126,21 +19946,20 @@ function initAppHandlers(cfg = {}) {
  * @param  {Object} cfg 		Configuration options
  */
 function start(cfg = {}) {
-  if (started) {
-    console.warn("Application already started, cannot call start again.");
-    return;
-  }
-
-  initLibraries(cfg);
-  initAppHandlers(cfg);
-  // if already bootloaded somewhere
-  // immediately call the onLaunch method
-  if (cfg.bootloaded) {
-    App.onLaunch(App.launchOptions);
-  }
-  started = true;
+    if (started) {
+        console.warn("Application already started, cannot call start again.");
+        return;
+    }
+    initLibraries(cfg);
+    initAppHandlers(cfg);
+    // if already bootloaded somewhere
+    // immediately call the onLaunch method
+    // @ts-ignore
+    if (cfg.bootloaded) {
+        App.onLaunch(App.launchOptions);
+    }
+    started = true;
 }
-
 /**
  * Reloads the application with the provided options and data.
  *
@@ -20155,22 +19974,19 @@ function start(cfg = {}) {
  * @param  {Object} [reloadData]        Custom data that needs to be passed while reloading the app
  */
 function reload(options, reloadData) {
-  App.onReload(options);
-  App.reload(options, reloadData);
+    App.onReload(options);
+    App.reload(options, reloadData);
 }
-
 // add all utility methods
 _.assign(libs, PubSub, {
-  start: start,
-  reload: reload,
+    start: start,
+    reload: reload,
 });
-
 /**
  * Dependency free publish/subscribe for JavaScript.
  * @external pubsub-js
  * @see https://github.com/mroderick/PubSubJS
  */
-
 /**
  * A minimalistic JavaScript SDK for Apple TV application development.
  * It assumes the code is run in an environment where [TVMLKit JS]{@link https://developer.apple.com/documentation/tvmljs} is present (or at least mocked).

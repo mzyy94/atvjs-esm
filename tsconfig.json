@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./types/*"]
+    }
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}

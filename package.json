@@ -26,6 +26,10 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/lodash": "^4.14.170",
+    "@types/lz-string": "^1.3.34",
+    "@types/pubsub-js": "^1.8.2",
     "jsdoc": "^3.4.3",
     "prettier": "^2.3.1",
     "rollup": "^2.51.0"

@@ -1,6 +1,8 @@
 import _ from "lodash";
 import LZString from "lz-string";
 
+let Settings = {};
+
 const lib = {
   /**
    * Sets a value for the given key in the localStorage (supports storing object values).

@@ -41,7 +41,7 @@ export default {
    * @param  {Object} [data]          The data that will be applied to the function
    * @return {Document}               A new Document
    */
-  dom(s, data) {
+  dom(s, data = []) {
     return parse(s, data);
   },
 };

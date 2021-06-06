@@ -147,6 +147,7 @@ const handlers = {
    * @alias module:ATV#onLaunch
    */
   onLaunch(options = {}, fn) {
+    // @ts-ignore
     libs.launchOptions = options;
     console.log("launching application...");
     fn(options);
@@ -346,6 +347,7 @@ function start(cfg = {}) {
   initAppHandlers(cfg);
   // if already bootloaded somewhere
   // immediately call the onLaunch method
+  // @ts-ignore
   if (cfg.bootloaded) {
     App.onLaunch(App.launchOptions);
   }

@@ -149,7 +149,7 @@ let handlers = {
  *
  * @param {Object} cfg The configuration object {defaults}
  */
-function setOptions(cfg = {}) {
+function setOptions(cfg: Partial<{ handlers: typeof handlers }> = {}) {
   console.log("setting handler options...", cfg);
   // override the default options
   _.defaultsDeep(handlers, cfg.handlers);
@@ -178,7 +178,11 @@ function setOptions(cfg = {}) {
  * @param {Object} cfg              The page object configuration.
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
-function setListeners(doc, cfg = {}, add = true) {
+function setListeners(
+  doc,
+  cfg: Partial<{ events: { [key in string]: [Function] } }> = {},
+  add = true
+) {
   if (!doc || !(doc instanceof Document)) {
     return;
   }

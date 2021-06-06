@@ -3,6 +3,8 @@ import Page from "./page";
 import Parser from "./parser";
 import Menu from "./menu";
 
+import "tvml";
+
 // few private variables
 let menuDoc = null;
 let loaderDoc = null;
@@ -13,7 +15,10 @@ let modalDoc = null;
 let defaults = {
   templates: {
     status: {},
+    loader: null,
+    error: null,
   },
+  menu: null,
 };
 
 /**
@@ -55,7 +60,7 @@ function getLoaderDoc(message) {
  * @return {Document}                       A newly created error document
  */
 function getErrorDoc(message) {
-  let cfg = {};
+  let cfg: any = {};
   if (_.isPlainObject(message)) {
     cfg = message;
     if (cfg.status && !cfg.template && defaults.templates.status[cfg.status]) {
@@ -112,7 +117,7 @@ function initMenu() {
  * @param  {Object} cfg         The configurations
  * @return {Document}           The created document
  */
-function show(cfg = {}) {
+function show(cfg: any = {}) {
   if (_.isFunction(cfg)) {
     cfg = {
       template: cfg,
@@ -367,6 +372,7 @@ function navigate(page, options, replace) {
         // warn and set the status to 500
         if (error instanceof Error) {
           console.error(`There was an error in the page code. ${error}`);
+          // @ts-ignore
           error.status = "500";
         }
         // try showing a status level error page if it exists
@@ -448,7 +454,7 @@ function clear() {
  *
  * @param  {Document} [doc]     The document until which we need to pop.
  */
-function pop(doc) {
+function pop(doc = null) {
   if (doc instanceof Document) {
     _.defer(() => navigationDocument.popToDocument(doc));
   } else {

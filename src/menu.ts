@@ -12,6 +12,7 @@ let created = false;
 let doc = Parser.dom(docStr);
 let menuBarEl = doc.getElementsByTagName("menuBar").item(0);
 let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0);
+// @ts-ignore
 let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
 let itemsCache = {};
 
@@ -71,7 +72,7 @@ function get() {
  *
  * @param {Object} item 	The configuration realted to the menu item.
  */
-function addItem(item = {}) {
+function addItem(item: any = {}) {
   if (!item.id) {
     console.warn(
       "Cannot add menuitem. A unique identifier is required for the menuitem to work correctly."
@@ -90,6 +91,7 @@ function addItem(item = {}) {
     _.isFunction(item.name) ? item.name() : item.name
   }</title>`;
   // add page reference
+  // @ts-ignore
   el.page = item.page;
   // appends to the menu
   menuBarEl.insertBefore(el, null);
@@ -224,17 +226,23 @@ export default {
    * @return {String} Loading message
    */
   getLoadingMessage() {
+    // @ts-ignore
     return _.isFunction(defaults.loadingMessage)
-      ? defaults.loadingMessage()
-      : defaults.loadingMessage;
+      ? // @ts-ignore
+        defaults.loadingMessage()
+      : // @ts-ignore
+        defaults.loadingMessage;
   },
   /**
    * Get the menu error message if provided in the config
    * @return {String} Error message
    */
   getErrorMessage() {
+    // @ts-ignore
     return _.isFunction(defaults.errorMessage)
-      ? defaults.errorMessage()
-      : defaults.errorMessage;
+      ? // @ts-ignore
+        defaults.errorMessage()
+      : // @ts-ignore
+        defaults.errorMessage;
   },
 };
