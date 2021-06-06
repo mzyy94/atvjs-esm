@@ -31,8 +31,8 @@
     "rollup": "^2.51.0"
   },
   "dependencies": {
-    "lodash": "4.17.11",
+    "lodash": "4.17.21",
     "lz-string": "1.4.4",
-    "pubsub-js": "1.7.0"
+    "pubsub-js": "1.9.3"
   }
 }
