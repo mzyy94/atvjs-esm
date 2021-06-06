@@ -16,8 +16,5 @@ export default {
       compact: true,
     },
   ],
-  plugins: [
-    resolve({ jsnext: true }),
-    commonjs(),
-  ],
+  plugins: [resolve({ jsnext: true }), commonjs()],
 };

@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import Page from './page';
-import Parser from './parser';
-import Menu from './menu';
+import _ from "lodash";
+import Page from "./page";
+import Parser from "./parser";
+import Menu from "./menu";
 
 // few private variables
 let menuDoc = null;
@@ -11,9 +11,9 @@ let modalDoc = null;
 
 // default options
 let defaults = {
-    templates: {
-        status: {}
-    }
+  templates: {
+    status: {},
+  },
 };
 
 /**
@@ -24,9 +24,9 @@ let defaults = {
  * @param {Object} cfg The configuration object {defaults}
  */
 function setOptions(cfg = {}) {
-    console.log('setting navigation options...', cfg);
-    // override the default options
-    _.assign(defaults, cfg);
+  console.log("setting navigation options...", cfg);
+  // override the default options
+  _.assign(defaults, cfg);
 }
 
 /**
@@ -39,10 +39,10 @@ function setOptions(cfg = {}) {
  * @return {Document}               A newly created loader document
  */
 function getLoaderDoc(message) {
-    let tpl = defaults.templates.loader;
-    let str = (tpl && tpl({message: message})) || '<document></document>';
+  let tpl = defaults.templates.loader;
+  let str = (tpl && tpl({ message: message })) || "<document></document>";
 
-    return Parser.dom(str);
+  return Parser.dom(str);
 }
 
 /**
@@ -55,18 +55,18 @@ function getLoaderDoc(message) {
  * @return {Document}                       A newly created error document
  */
 function getErrorDoc(message) {
-    let cfg = {};
-    if (_.isPlainObject(message)) {
-        cfg = message;
-        if (cfg.status && !cfg.template && defaults.templates.status[cfg.status]) {
-            cfg.template = defaults.templates.status[cfg.status];
-        }
-    } else {
-        cfg.template = defaults.templates.error || (() => '<document></document>');
-        cfg.data = {message: message};
+  let cfg = {};
+  if (_.isPlainObject(message)) {
+    cfg = message;
+    if (cfg.status && !cfg.template && defaults.templates.status[cfg.status]) {
+      cfg.template = defaults.templates.status[cfg.status];
     }
+  } else {
+    cfg.template = defaults.templates.error || (() => "<document></document>");
+    cfg.data = { message: message };
+  }
 
-    return Page.makeDom(cfg);
+  return Page.makeDom(cfg);
 }
 
 /**
@@ -77,8 +77,8 @@ function getErrorDoc(message) {
  * @return {Document} The document
  */
 function getLastDocumentFromStack() {
-    let docs = navigationDocument.documents;
-    return docs[docs.length - 1];
+  let docs = navigationDocument.documents;
+  return docs[docs.length - 1];
 }
 
 /**
@@ -87,21 +87,21 @@ function getLastDocumentFromStack() {
  * @private
  */
 function initMenu() {
-    let menuCfg = defaults.menu;
+  let menuCfg = defaults.menu;
 
-    // no configuration given and neither the menu created earlier
-    // no need to proceed
-    if (!menuCfg && !Menu.created) {
-        return;
-    }
+  // no configuration given and neither the menu created earlier
+  // no need to proceed
+  if (!menuCfg && !Menu.created) {
+    return;
+  }
 
-    // set options to create menu
-    if (menuCfg) {
-        Menu.setOptions(menuCfg);
-    }
+  // set options to create menu
+  if (menuCfg) {
+    Menu.setOptions(menuCfg);
+  }
 
-    menuDoc = Menu.get();
-    Page.prepareDom(menuDoc);
+  menuDoc = Menu.get();
+  Page.prepareDom(menuDoc);
 }
 
 /**
@@ -113,25 +113,27 @@ function initMenu() {
  * @return {Document}           The created document
  */
 function show(cfg = {}) {
-    if (_.isFunction(cfg)) {
-        cfg = {
-            template: cfg
-        };
-    }
+  if (_.isFunction(cfg)) {
+    cfg = {
+      template: cfg,
+    };
+  }
 
-    // no template exists, cannot proceed
-    if (!cfg.template) {
-        console.warn('No template found!')
-        return;
-    }
-    let doc = null;
-    if (getLastDocumentFromStack() && cfg.type === 'modal') { // show as a modal if there is something on the navigation stack
-        doc = presentModal(cfg);
-    } else { // no document on the navigation stack, show as a document
-        doc = Page.makeDom(cfg);
-        cleanNavigate(doc);
-    }
-    return doc;
+  // no template exists, cannot proceed
+  if (!cfg.template) {
+    console.warn("No template found!");
+    return;
+  }
+  let doc = null;
+  if (getLastDocumentFromStack() && cfg.type === "modal") {
+    // show as a modal if there is something on the navigation stack
+    doc = presentModal(cfg);
+  } else {
+    // no document on the navigation stack, show as a document
+    doc = Page.makeDom(cfg);
+    cleanNavigate(doc);
+  }
+  return doc;
 }
 
 /**
@@ -145,25 +147,25 @@ function show(cfg = {}) {
  * @return {Document}               The created loader document.
  */
 function showLoading(cfg = {}) {
-    if (_.isString(cfg)) {
-        cfg = {
-            data: {
-                message: cfg
-            }
-        };
-    }
-    // use default loading template if not passed as a configuration
-    _.defaultsDeep(cfg, {
-        template: defaults.templates.loader,
-        type: 'modal'
-    });
+  if (_.isString(cfg)) {
+    cfg = {
+      data: {
+        message: cfg,
+      },
+    };
+  }
+  // use default loading template if not passed as a configuration
+  _.defaultsDeep(cfg, {
+    template: defaults.templates.loader,
+    type: "modal",
+  });
 
-    console.log('showing loader... options:', cfg);
+  console.log("showing loader... options:", cfg);
 
-    // cache the doc for later use
-    loaderDoc = show(cfg);
+  // cache the doc for later use
+  loaderDoc = show(cfg);
 
-    return loaderDoc;
+  return loaderDoc;
 }
 
 /**
@@ -177,28 +179,29 @@ function showLoading(cfg = {}) {
  * @return {Document}                       The created error document.
  */
 function showError(cfg = {}) {
-    if (_.isBoolean(cfg) && !cfg && errorDoc) { // hide error
-        navigationDocument.removeDocument(errorDoc);
-        return;
-    }
-    if (_.isString(cfg)) {
-        cfg = {
-            data: {
-                message: cfg
-            }
-        };
-    }
-    // use default error template if not passed as a configuration
-    _.defaultsDeep(cfg, {
-        template: defaults.templates.error
-    });
+  if (_.isBoolean(cfg) && !cfg && errorDoc) {
+    // hide error
+    navigationDocument.removeDocument(errorDoc);
+    return;
+  }
+  if (_.isString(cfg)) {
+    cfg = {
+      data: {
+        message: cfg,
+      },
+    };
+  }
+  // use default error template if not passed as a configuration
+  _.defaultsDeep(cfg, {
+    template: defaults.templates.error,
+  });
 
-    console.log('showing error... options:', cfg);
+  console.log("showing error... options:", cfg);
 
-    // cache the doc for later use
-    errorDoc = show(cfg);
+  // cache the doc for later use
+  errorDoc = show(cfg);
 
-    return errorDoc;
+  return errorDoc;
 }
 
 /**
@@ -209,11 +212,11 @@ function showError(cfg = {}) {
  * @param  {Document} doc       The document to push to the navigation stack
  */
 function pushDocument(doc) {
-    if (!(doc instanceof Document)) {
-        console.warn('Cannot navigate to the document.', doc);
-        return;
-    }
-    navigationDocument.pushDocument(doc);
+  if (!(doc instanceof Document)) {
+    console.warn("Cannot navigate to the document.", doc);
+    return;
+  }
+  navigationDocument.pushDocument(doc);
 }
 
 /**
@@ -227,11 +230,11 @@ function pushDocument(doc) {
  * @param  {Document} docToReplace      The document to replace
  */
 function replaceDocument(doc, docToReplace) {
-    if (!(doc instanceof Document) || !(docToReplace instanceof Document)) {
-        console.warn('Cannot replace document.');
-        return;
-    }
-    navigationDocument.replaceDocument(doc, docToReplace);
+  if (!(doc instanceof Document) || !(docToReplace instanceof Document)) {
+    console.warn("Cannot replace document.");
+    return;
+  }
+  navigationDocument.replaceDocument(doc, docToReplace);
 }
 
 /**
@@ -244,30 +247,31 @@ function replaceDocument(doc, docToReplace) {
  * @return  {Document}                  The current document on the stack
  */
 function cleanNavigate(doc, replace = false) {
-    let navigated = false;
-    let docs = navigationDocument.documents;
-    let last = getLastDocumentFromStack();
+  let navigated = false;
+  let docs = navigationDocument.documents;
+  let last = getLastDocumentFromStack();
 
-    if (!replace && (!last || last !== loaderDoc && last !== errorDoc)) {
-        pushDocument(doc);
-    } else if (last && last === loaderDoc || last === errorDoc) { // replaces any error or loader document from the current document stack
-        console.log('replacing current error/loader...');
-        replaceDocument(doc, last);
-        loaderDoc = null;
-        errorDoc = null;
-    }
-    // determine the current document on the navigation stack
-    last = replace && getLastDocumentFromStack();
-    // if replace is passed as a param and there is some document on the top of stack
-    if (last) {
-        console.log('replacing current document...');
-        replaceDocument(doc, last);
-    }
+  if (!replace && (!last || (last !== loaderDoc && last !== errorDoc))) {
+    pushDocument(doc);
+  } else if ((last && last === loaderDoc) || last === errorDoc) {
+    // replaces any error or loader document from the current document stack
+    console.log("replacing current error/loader...");
+    replaceDocument(doc, last);
+    loaderDoc = null;
+    errorDoc = null;
+  }
+  // determine the current document on the navigation stack
+  last = replace && getLastDocumentFromStack();
+  // if replace is passed as a param and there is some document on the top of stack
+  if (last) {
+    console.log("replacing current document...");
+    replaceDocument(doc, last);
+  }
 
-    // dismisses any modal open modal
-    _.delay(dismissModal, 2000);
+  // dismisses any modal open modal
+  _.delay(dismissModal, 2000);
 
-    return docs[docs.length - 1];
+  return docs[docs.length - 1];
 }
 
 /**
@@ -279,21 +283,22 @@ function cleanNavigate(doc, replace = false) {
  * @return {Promise}      Returns a Promise that resolves upon successful navigation.
  */
 function navigateToMenuPage() {
+  console.log("navigating to menu...");
 
-    console.log('navigating to menu...');
-
-    return new Promise((resolve, reject) => {
-        if (!menuDoc) {
-            initMenu();
-        }
-        if (!menuDoc) {
-            console.warn('No menu configuration exists, cannot navigate to the menu page.');
-            reject();
-        } else {
-            cleanNavigate(menuDoc);
-            resolve(menuDoc);
-        }
-    });
+  return new Promise((resolve, reject) => {
+    if (!menuDoc) {
+      initMenu();
+    }
+    if (!menuDoc) {
+      console.warn(
+        "No menu configuration exists, cannot navigate to the menu page."
+      );
+      reject();
+    } else {
+      cleanNavigate(menuDoc);
+      resolve(menuDoc);
+    }
+  });
 }
 
 /**
@@ -308,73 +313,85 @@ function navigateToMenuPage() {
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
 function navigate(page, options, replace) {
-    let p = Page.get(page);
+  let p = Page.get(page);
 
-    if (_.isBoolean(options)) {
-        replace = options;
-    } else {
-        options = options || {};
-    }
+  if (_.isBoolean(options)) {
+    replace = options;
+  } else {
+    options = options || {};
+  }
 
-    if (_.isBoolean(options.replace)) {
-        replace = options.replace;
-    }
+  if (_.isBoolean(options.replace)) {
+    replace = options.replace;
+  }
 
-    console.log('navigating... page:', page, ':: options:', options);
+  console.log("navigating... page:", page, ":: options:", options);
 
-    // return a promise that resolves if there was a navigation that was performed
-    return new Promise((resolve, reject) => {
-        if (!p) {
-            console.error(page, 'page does not exist!');
-            let tpl = defaults.templates.status['404'];
-            if (tpl) {
-                let doc = showError({
-                    template: tpl,
-                    title: '404',
-                    message: 'The requested page cannot be found!'
-                });
-                resolve(doc);
-            } else {
-                reject();
-            }
-            return;
-        }
-
-        p(options).then((doc) => {
-            // support suppressing of navigation since there is no dom available (page resolved with empty document)
-            if (doc) {
-                // if page is a modal, show as modal window
-                if (p.type === 'modal') {
-                    // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
-                    _.defer(presentModal, doc);
-                } else { // navigate
-                    // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
-                    _.defer(cleanNavigate, doc, replace);
-                }
-            }
-            // resolve promise
-            resolve(doc);
-        }, (error) => {
-            // something went wrong during the page execution
-            // warn and set the status to 500
-            if (error instanceof Error) {
-                console.error(`There was an error in the page code. ${error}`);
-                error.status = '500';
-            }
-            // try showing a status level error page if it exists
-            let statusLevelErrorTpls = defaults.templates.status;
-            let tpl = statusLevelErrorTpls[error.status];
-            if (tpl) {
-                showError(_.defaults({
-                    template: tpl
-                }, error.response));
-                resolve(error);
-            } else {
-                console.warn('No error handler present in the page or navigation default configurations.', error);
-                reject(error);
-            }
+  // return a promise that resolves if there was a navigation that was performed
+  return new Promise((resolve, reject) => {
+    if (!p) {
+      console.error(page, "page does not exist!");
+      let tpl = defaults.templates.status["404"];
+      if (tpl) {
+        let doc = showError({
+          template: tpl,
+          title: "404",
+          message: "The requested page cannot be found!",
         });
-    });
+        resolve(doc);
+      } else {
+        reject();
+      }
+      return;
+    }
+
+    p(options).then(
+      (doc) => {
+        // support suppressing of navigation since there is no dom available (page resolved with empty document)
+        if (doc) {
+          // if page is a modal, show as modal window
+          if (p.type === "modal") {
+            // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
+            _.defer(presentModal, doc);
+          } else {
+            // navigate
+            // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
+            _.defer(cleanNavigate, doc, replace);
+          }
+        }
+        // resolve promise
+        resolve(doc);
+      },
+      (error) => {
+        // something went wrong during the page execution
+        // warn and set the status to 500
+        if (error instanceof Error) {
+          console.error(`There was an error in the page code. ${error}`);
+          error.status = "500";
+        }
+        // try showing a status level error page if it exists
+        let statusLevelErrorTpls = defaults.templates.status;
+        let tpl = statusLevelErrorTpls[error.status];
+        if (tpl) {
+          showError(
+            _.defaults(
+              {
+                template: tpl,
+              },
+              error.response
+            )
+          );
+          resolve(error);
+        } else {
+          console.warn(
+            "No error handler present in the page or navigation default configurations.",
+            error
+          );
+          reject(error);
+        }
+      }
+    );
+  });
 }
 
 /**
@@ -387,15 +404,17 @@ function navigate(page, options, replace) {
  * @return {Document}                           The created modal document
  */
 function presentModal(modal) {
-    let doc = modal; // assume a document object is passed
-    if (_.isString(modal)) { // if a modal document string is passed
-        doc = Parser.dom(modal);
-    } else if (_.isPlainObject(modal)) { // if a modal page configuration is passed
-        doc = Page.makeDom(modal);
-    }
-    navigationDocument.presentModal(doc);
-    modalDoc = doc;
-    return doc;
+  let doc = modal; // assume a document object is passed
+  if (_.isString(modal)) {
+    // if a modal document string is passed
+    doc = Parser.dom(modal);
+  } else if (_.isPlainObject(modal)) {
+    // if a modal page configuration is passed
+    doc = Page.makeDom(modal);
+  }
+  navigationDocument.presentModal(doc);
+  modalDoc = doc;
+  return doc;
 }
 
 /**
@@ -405,8 +424,8 @@ function presentModal(modal) {
  * @alias module:navigation.dismissModal
  */
 function dismissModal() {
-    navigationDocument.dismissModal();
-    modalDoc = null;
+  navigationDocument.dismissModal();
+  modalDoc = null;
 }
 
 /**
@@ -416,9 +435,9 @@ function dismissModal() {
  * @alias module:navigation.clear
  */
 function clear() {
-    loaderDoc = null;
-    modalDoc = null;
-    navigationDocument.clear();
+  loaderDoc = null;
+  modalDoc = null;
+  navigationDocument.clear();
 }
 
 /**
@@ -430,11 +449,11 @@ function clear() {
  * @param  {Document} [doc]     The document until which we need to pop.
  */
 function pop(doc) {
-    if (doc instanceof Document) {
-        _.defer(() => navigationDocument.popToDocument(doc));
-    } else {
-        _.defer(() => navigationDocument.popDocument());
-    }
+  if (doc instanceof Document) {
+    _.defer(() => navigationDocument.popToDocument(doc));
+  } else {
+    _.defer(() => navigationDocument.popDocument());
+  }
 }
 
 /**
@@ -444,9 +463,9 @@ function pop(doc) {
  * @alias module:navigation.back
  */
 function back() {
-    if (getLastDocumentFromStack()) {
-        pop();
-    }
+  if (getLastDocumentFromStack()) {
+    pop();
+  }
 }
 
 /**
@@ -456,8 +475,8 @@ function back() {
  * @alias module:navigation.removeActiveDocument
  */
 function removeActiveDocument() {
-    let doc = getActiveDocument();
-    doc && navigationDocument.removeDocument(doc);
+  let doc = getActiveDocument();
+  doc && navigationDocument.removeDocument(doc);
 }
 
 /**
@@ -469,32 +488,36 @@ function removeActiveDocument() {
  *
  */
 export default {
-    /**
-     * Returns the topmost document from the navigation stack.
-     * @return {Document} TVML Document
-     */
-    get currentDocument() { return getLastDocumentFromStack(); },
-    set currentDocument(doc) { },
-    /**
-     * Returns the current active document presented on the UI.
-     *
-     * Note: This is just a wrapper to the TVMLKit JS [getActiveDocument]{@linkcode https://developer.apple.com/documentation/tvmljs/1627314-getactivedocument} method.
-     * @return {Document} TVML Document
-     */
-    get activeDocument() { return getActiveDocument(); },
-    set activeDocument(doc) { },
-    setOptions: setOptions,
-    navigate: navigate,
-    navigateToMenuPage: navigateToMenuPage,
-    getLoaderDoc: getLoaderDoc,
-    getErrorDoc: getErrorDoc,
-    showLoading: showLoading,
-    showError: showError,
-    presentModal: presentModal,
-    dismissModal: dismissModal,
-    clear: clear,
-    back: back,
-    pop: pop,
-    removeActiveDocument: removeActiveDocument,
-    replaceDocument: replaceDocument
+  /**
+   * Returns the topmost document from the navigation stack.
+   * @return {Document} TVML Document
+   */
+  get currentDocument() {
+    return getLastDocumentFromStack();
+  },
+  set currentDocument(doc) {},
+  /**
+   * Returns the current active document presented on the UI.
+   *
+   * Note: This is just a wrapper to the TVMLKit JS [getActiveDocument]{@linkcode https://developer.apple.com/documentation/tvmljs/1627314-getactivedocument} method.
+   * @return {Document} TVML Document
+   */
+  get activeDocument() {
+    return getActiveDocument();
+  },
+  set activeDocument(doc) {},
+  setOptions: setOptions,
+  navigate: navigate,
+  navigateToMenuPage: navigateToMenuPage,
+  getLoaderDoc: getLoaderDoc,
+  getErrorDoc: getErrorDoc,
+  showLoading: showLoading,
+  showError: showError,
+  presentModal: presentModal,
+  dismissModal: dismissModal,
+  clear: clear,
+  back: back,
+  pop: pop,
+  removeActiveDocument: removeActiveDocument,
+  replaceDocument: replaceDocument,
 };

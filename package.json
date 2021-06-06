@@ -14,6 +14,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
+    "format": "prettier -w .",
     "docs": "node_modules/.bin/jsdoc --configure jsdoc.conf.json --verbose"
   },
   "author": "Emad Alam <emad.alam@yahoo.com>",
@@ -26,6 +27,7 @@
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "jsdoc": "^3.4.3",
+    "prettier": "^2.3.1",
     "rollup": "^2.51.0"
   },
   "dependencies": {

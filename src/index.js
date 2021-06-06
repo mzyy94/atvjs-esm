@@ -1,24 +1,24 @@
 // external libraries
-import _ from 'lodash';
-import PubSub from 'pubsub-js';
-import LZString from 'lz-string';
+import _ from "lodash";
+import PubSub from "pubsub-js";
+import LZString from "lz-string";
 
 // internal libraries
-import Parser from './parser';
-import Ajax from './ajax';
-import Page from './page';
-import Navigation from './navigation';
-import Handler from './handler';
-import Settings from './settings';
-import Menu from './menu';
+import Parser from "./parser";
+import Ajax from "./ajax";
+import Page from "./page";
+import Navigation from "./navigation";
+import Handler from "./handler";
+import Settings from "./settings";
+import Menu from "./menu";
 
 // all supported configurations for each of the libraries
 const configMap = {
-	Ajax: [],
-	Parser: [],
-	Page: ['style'],
-	Navigation: ['menu', 'templates'],
-	Handler: ['handlers'],
+  Ajax: [],
+  Parser: [],
+  Page: ["style"],
+  Navigation: ["menu", "templates"],
+  Handler: ["handlers"],
 };
 
 // indicate whether the application was started
@@ -26,100 +26,100 @@ let started = false;
 
 // all libraries
 let libs = {
-    /**
-     * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
-     * @alias module:ATV._
-     */
-    _: _,
-    /**
-     * Internal alias to [lz-string compression]{@link https://github.com/pieroxy/lz-string/} library
-     * @alias module:ATV.LZString
-     */
-    LZString: LZString,
-    /**
-     * Ajax wrapper using Promises
-     * @alias module:ATV.Ajax
-     * @type {module:ajax}
-     */
-    Ajax: Ajax,
-    /**
-     * Page level navigation methods.
-     * @alias module:ATV.Navigation
-     * @type {module:navigation}
-     */
-    Navigation: Navigation,
-    /**
-     * Page Creation
-     * @alias module:ATV.Page
-     * @type {module:page}
-     */
-    Page: Page,
-    /**
-     * A minimalistic parser wrapper using the builtin DOMParser
-     * @alias module:ATV.Parser
-     * @type {module:parser}
-     */
-    Parser: Parser,
-    /**
-     * Basic event handling including some default ones
-     * @alias module:ATV.Handler
-     * @type {module:handler}
-     */
-    Handler: Handler,
-    /**
-     * Apple TV settings object with some basic helpers
-     * @alias module:ATV.Settings
-     * @type {module:settings}
-     */
-    Settings: Settings,
-    /**
-     * TVML menu template creation with few utility methods
-     * @alias module:ATV.Menu
-     * @type {module:menu}
-     */
-    Menu: Menu,
-    /**
-     * Create a page that can be later used for navigation.
-     * This is an alias of ATV.Page.create 
-     * @param  {String|Object} name     Name of the page or the configuration options
-     * @param  {Object} cfg             Page configuration options
-     * @return {Function}               A function that returns promise upon execution
-     */
-    createPage: Page.create,
-    /**
-     * Generates a menu from the configuration object.
-     * This is an alias of ATV.Menu.create 
-     * @param  {Object} cfg 		Menu related configurations
-     * @return {Document}     		The created menu document
-     */
-    createMenu: Menu.create,
-    /**
-     * Navigates to the provided page if it exists in the list of available pages.
-     * This is an alias of ATV.Navigation.navigate 
-     * @param  {String} page        Name of the previously created page.
-     * @param  {Object} options     The options that will be passed on to the page during runtime.
-     * @param  {Boolean} replace    Replace the previous page.
-     * @return {Promise}            Returns a Promise that resolves upon successful navigation.
-     */
-    navigateTo: Navigation.navigate,
-    /**
-     * Navigates to the menu page if it exists
-     * This is an alias of ATV.Navigation.navigateToMenuPage 
-     * @return {Promise}      Returns a Promise that resolves upon successful navigation.
-     */
-    navigateToMenuPage: Navigation.navigateToMenuPage,
-    /**
-     * Shows a modal. Closes the previous modal before showing a new modal.
-     * This is an alias of ATV.Navigation.presentModal 
-     * @param  {Document|String|Object} modal       The TVML string/document representation of the modal window or a configuration object to create modal from
-     * @return {Document}                           The created modal document
-     */
-    presentModal: Navigation.presentModal,
-    /**
-     * Dismisses the current modal window.
-     * This is an alias of ATV.Navigation.dismissModal 
-     */
-    dismissModal: Navigation.dismissModal
+  /**
+   * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
+   * @alias module:ATV._
+   */
+  _: _,
+  /**
+   * Internal alias to [lz-string compression]{@link https://github.com/pieroxy/lz-string/} library
+   * @alias module:ATV.LZString
+   */
+  LZString: LZString,
+  /**
+   * Ajax wrapper using Promises
+   * @alias module:ATV.Ajax
+   * @type {module:ajax}
+   */
+  Ajax: Ajax,
+  /**
+   * Page level navigation methods.
+   * @alias module:ATV.Navigation
+   * @type {module:navigation}
+   */
+  Navigation: Navigation,
+  /**
+   * Page Creation
+   * @alias module:ATV.Page
+   * @type {module:page}
+   */
+  Page: Page,
+  /**
+   * A minimalistic parser wrapper using the builtin DOMParser
+   * @alias module:ATV.Parser
+   * @type {module:parser}
+   */
+  Parser: Parser,
+  /**
+   * Basic event handling including some default ones
+   * @alias module:ATV.Handler
+   * @type {module:handler}
+   */
+  Handler: Handler,
+  /**
+   * Apple TV settings object with some basic helpers
+   * @alias module:ATV.Settings
+   * @type {module:settings}
+   */
+  Settings: Settings,
+  /**
+   * TVML menu template creation with few utility methods
+   * @alias module:ATV.Menu
+   * @type {module:menu}
+   */
+  Menu: Menu,
+  /**
+   * Create a page that can be later used for navigation.
+   * This is an alias of ATV.Page.create
+   * @param  {String|Object} name     Name of the page or the configuration options
+   * @param  {Object} cfg             Page configuration options
+   * @return {Function}               A function that returns promise upon execution
+   */
+  createPage: Page.create,
+  /**
+   * Generates a menu from the configuration object.
+   * This is an alias of ATV.Menu.create
+   * @param  {Object} cfg 		Menu related configurations
+   * @return {Document}     		The created menu document
+   */
+  createMenu: Menu.create,
+  /**
+   * Navigates to the provided page if it exists in the list of available pages.
+   * This is an alias of ATV.Navigation.navigate
+   * @param  {String} page        Name of the previously created page.
+   * @param  {Object} options     The options that will be passed on to the page during runtime.
+   * @param  {Boolean} replace    Replace the previous page.
+   * @return {Promise}            Returns a Promise that resolves upon successful navigation.
+   */
+  navigateTo: Navigation.navigate,
+  /**
+   * Navigates to the menu page if it exists
+   * This is an alias of ATV.Navigation.navigateToMenuPage
+   * @return {Promise}      Returns a Promise that resolves upon successful navigation.
+   */
+  navigateToMenuPage: Navigation.navigateToMenuPage,
+  /**
+   * Shows a modal. Closes the previous modal before showing a new modal.
+   * This is an alias of ATV.Navigation.presentModal
+   * @param  {Document|String|Object} modal       The TVML string/document representation of the modal window or a configuration object to create modal from
+   * @return {Document}                           The created modal document
+   */
+  presentModal: Navigation.presentModal,
+  /**
+   * Dismisses the current modal window.
+   * This is an alias of ATV.Navigation.dismissModal
+   */
+  dismissModal: Navigation.dismissModal,
 };
 
 /**
@@ -130,77 +130,77 @@ let libs = {
  * @param  {Object} cfg 	All configuration options relevant to the libraries
  */
 function initLibraries(cfg = {}) {
-	_.each(configMap, (keys, libName) => {
-		let lib = libs[libName];
-		let options = {};
-		_.each(keys, (key) => options[key] = cfg[key]);
-		lib.setOptions && lib.setOptions(options);
-	});
+  _.each(configMap, (keys, libName) => {
+    let lib = libs[libName];
+    let options = {};
+    _.each(keys, (key) => (options[key] = cfg[key]));
+    lib.setOptions && lib.setOptions(options);
+  });
 }
 
 // all supported Apple TV App level handlers
 const handlers = {
-    /**
-     * App launch event
-     *
-     * @event onLaunch
-     * @alias module:ATV#onLaunch
-     */
-    onLaunch(options = {}, fn) {
-        libs.launchOptions = options;
-        console.log('launching application...');
-        fn(options);
-    },
-    /**
-     * App error event
-     *
-     * @event onError
-     * @alias module:ATV#onError
-     */
-    onError(options = {}, fn) {
-        console.log('an error occurred in the application...')
-        fn(options);
-    },
-    /**
-     * App resume event
-     *
-     * @event onResume
-     * @alias module:ATV#onResume
-     */
-    onResume(options = {}, fn) {
-        console.log('resuming application...');
-        fn(options);
-    },
-    /**
-     * App suspend event
-     *
-     * @event onSuspend
-     * @alias module:ATV#onSuspend
-     */
-    onSuspend(options = {}, fn) {
-        console.log('suspending application...');
-        fn(options);
-    },
-    /**
-     * App exit event
-     *
-     * @event onExit
-     * @alias module:ATV#onExit
-     */
-    onExit(options = {}, fn) {
-        console.log('exiting application...');
-        fn(options);
-    },
-    /**
-     * App reload event
-     *
-     * @event onReload
-     * @alias module:ATV#onReload
-     */
-    onReload(options = {}, fn) {
-        console.log('reloading application...');
-        fn(options);
-    }
+  /**
+   * App launch event
+   *
+   * @event onLaunch
+   * @alias module:ATV#onLaunch
+   */
+  onLaunch(options = {}, fn) {
+    libs.launchOptions = options;
+    console.log("launching application...");
+    fn(options);
+  },
+  /**
+   * App error event
+   *
+   * @event onError
+   * @alias module:ATV#onError
+   */
+  onError(options = {}, fn) {
+    console.log("an error occurred in the application...");
+    fn(options);
+  },
+  /**
+   * App resume event
+   *
+   * @event onResume
+   * @alias module:ATV#onResume
+   */
+  onResume(options = {}, fn) {
+    console.log("resuming application...");
+    fn(options);
+  },
+  /**
+   * App suspend event
+   *
+   * @event onSuspend
+   * @alias module:ATV#onSuspend
+   */
+  onSuspend(options = {}, fn) {
+    console.log("suspending application...");
+    fn(options);
+  },
+  /**
+   * App exit event
+   *
+   * @event onExit
+   * @alias module:ATV#onExit
+   */
+  onExit(options = {}, fn) {
+    console.log("exiting application...");
+    fn(options);
+  },
+  /**
+   * App reload event
+   *
+   * @event onReload
+   * @alias module:ATV#onReload
+   */
+  onReload(options = {}, fn) {
+    console.log("reloading application...");
+    fn(options);
+  },
 };
 
 /**
@@ -210,8 +210,16 @@ const handlers = {
  *
  * @param  {Object} cfg 	All configuration options relevant to the App.
  */
-function initAppHandlers (cfg = {}) {
-	_.each(handlers, (handler, name) => App[name] = _.partial(handler, _, (_.isFunction(cfg[name])) ? cfg[name] : _.noop));
+function initAppHandlers(cfg = {}) {
+  _.each(
+    handlers,
+    (handler, name) =>
+      (App[name] = _.partial(
+        handler,
+        _,
+        _.isFunction(cfg[name]) ? cfg[name] : _.noop
+      ))
+  );
 }
 
 /**
@@ -329,19 +337,19 @@ function initAppHandlers (cfg = {}) {
  * @param  {Object} cfg 		Configuration options
  */
 function start(cfg = {}) {
-	if (started) {
-		console.warn('Application already started, cannot call start again.');
-		return;
-	}
+  if (started) {
+    console.warn("Application already started, cannot call start again.");
+    return;
+  }
 
-    initLibraries(cfg);
-	initAppHandlers(cfg);
-    // if already bootloaded somewhere
-    // immediately call the onLaunch method
-    if (cfg.bootloaded) {
-        App.onLaunch(App.launchOptions);
-    }
-	started = true;
+  initLibraries(cfg);
+  initAppHandlers(cfg);
+  // if already bootloaded somewhere
+  // immediately call the onLaunch method
+  if (cfg.bootloaded) {
+    App.onLaunch(App.launchOptions);
+  }
+  started = true;
 }
 
 /**
@@ -358,14 +366,14 @@ function start(cfg = {}) {
  * @param  {Object} [reloadData]        Custom data that needs to be passed while reloading the app
  */
 function reload(options, reloadData) {
-    App.onReload(options);
-    App.reload(options, reloadData);
+  App.onReload(options);
+  App.reload(options, reloadData);
 }
 
 // add all utility methods
 _.assign(libs, PubSub, {
-    start: start,
-    reload: reload
+  start: start,
+  reload: reload,
 });
 
 /**
