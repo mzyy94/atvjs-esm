@@ -275,7 +275,8 @@ export default {
         // cache for later user
         pages[name] = p;
         // merge configurations on the page
-        _.assign(p, cfg);
+        // FIXME: failed with merging read-only property.
+        // _.assign(p, cfg);
         // return the created page to allow chaining
         return p;
     },
