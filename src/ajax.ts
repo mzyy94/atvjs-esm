@@ -1,10 +1,24 @@
 /**
+ * Options for the ajax.
+ */
+interface Options {
+  responseType: "json" | "text";
+  url?: string;
+  method?: string;
+  user?: string;
+  password?: string;
+  async?: boolean;
+  headers?: { [key in string]: string };
+  data?: Document | BodyInit;
+}
+
+/**
  * Default options for the ajax.
  *
  * @private
  * @type {Object}
  */
-const defaults = {
+const defaults: Options = {
   responseType: "json",
 };
 
@@ -23,7 +37,11 @@ const defaults = {
  * @param  {String} [method='GET']                      Type of HTTP request (defaults to GET)
  * @return {Promise}                                     The Promise that resolves on ajax success
  */
-function ajax(url, options, method = "GET") {
+function ajax(
+  url: string | Options,
+  options?: Options,
+  method = "GET"
+): Promise<XMLHttpRequest> {
   if (typeof url == "undefined") {
     console.error("No url specified for the ajax.");
     throw new TypeError("A URL is required for making the ajax request.");
@@ -58,7 +76,7 @@ function ajax(url, options, method = "GET") {
     // open connection
     xhr.open(
       options.method,
-      url,
+      url as string,
       typeof options.async === "undefined" ? true : options.async,
       options.user,
       options.password
@@ -87,7 +105,7 @@ function ajax(url, options, method = "GET") {
   });
 }
 
-Object.assign(ajax, {
+const methods = {
   /**
    * Perform an ajax request using HTTP GET
    *
@@ -146,8 +164,9 @@ Object.assign(ajax, {
   del(url, options) {
     return ajax(url, options, "DELETE");
   },
-});
+};
 
+Object.assign(ajax, methods);
 /**
  * A very minimalistic AJAX implementation that returns promise instead of relying in callbacks.
  *
@@ -156,4 +175,4 @@ Object.assign(ajax, {
  * @author eMAD <emad.alam@yahoo.com>
  *
  */
-export default ajax;
+export default ajax as unknown as typeof methods;

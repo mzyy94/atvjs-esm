@@ -12,12 +12,19 @@ let created = false;
 let doc = Parser.dom(docStr);
 let menuBarEl = doc.getElementsByTagName("menuBar").item(0);
 let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0);
-// @ts-ignore
 let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
 let itemsCache = {};
 
+interface Options {
+  attributes: {};
+  rootTemplateAttributes: {};
+  items: [];
+  loadingMessage?: (() => string) | string;
+  errorMessage?: (() => string) | string;
+}
+
 // default menu options
-let defaults = {
+let defaults: Options = {
   attributes: {},
   rootTemplateAttributes: {},
   items: [],
@@ -65,6 +72,13 @@ function get() {
   return doc;
 }
 
+interface Item {
+  id: string;
+  attributes?: {};
+  name?: (() => string) | string;
+  page?: unknown;
+}
+
 /**
  * Adds menu item to the menu document.
  *
@@ -72,7 +86,7 @@ function get() {
  *
  * @param {Object} item 	The configuration realted to the menu item.
  */
-function addItem(item: any = {}) {
+function addItem(item: Item) {
   if (!item.id) {
     console.warn(
       "Cannot add menuitem. A unique identifier is required for the menuitem to work correctly."
@@ -91,8 +105,7 @@ function addItem(item: any = {}) {
     _.isFunction(item.name) ? item.name() : item.name
   }</title>`;
   // add page reference
-  // @ts-ignore
-  el.page = item.page;
+  Object.assign(el, { page: item.page });
   // appends to the menu
   menuBarEl.insertBefore(el, null);
   // cache for later use
@@ -226,23 +239,17 @@ export default {
    * @return {String} Loading message
    */
   getLoadingMessage() {
-    // @ts-ignore
     return _.isFunction(defaults.loadingMessage)
-      ? // @ts-ignore
-        defaults.loadingMessage()
-      : // @ts-ignore
-        defaults.loadingMessage;
+      ? defaults.loadingMessage()
+      : defaults.loadingMessage;
   },
   /**
    * Get the menu error message if provided in the config
    * @return {String} Error message
    */
   getErrorMessage() {
-    // @ts-ignore
     return _.isFunction(defaults.errorMessage)
-      ? // @ts-ignore
-        defaults.errorMessage()
-      : // @ts-ignore
-        defaults.errorMessage;
+      ? defaults.errorMessage()
+      : defaults.errorMessage;
   },
 };

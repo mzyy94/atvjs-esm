@@ -21,6 +21,13 @@ const configMap = {
   Handler: ["handlers"],
 };
 
+/**
+ * Start options.
+ */
+interface Options {
+  bootloaded?: boolean;
+}
+
 // indicate whether the application was started
 let started = false;
 
@@ -147,8 +154,7 @@ const handlers = {
    * @alias module:ATV#onLaunch
    */
   onLaunch(options = {}, fn) {
-    // @ts-ignore
-    libs.launchOptions = options;
+    Object.assign(libs, { launchOptions: options });
     console.log("launching application...");
     fn(options);
   },
@@ -337,7 +343,7 @@ function initAppHandlers(cfg = {}) {
  *
  * @param  {Object} cfg 		Configuration options
  */
-function start(cfg = {}) {
+function start(cfg: Options = {}) {
   if (started) {
     console.warn("Application already started, cannot call start again.");
     return;
@@ -347,7 +353,6 @@ function start(cfg = {}) {
   initAppHandlers(cfg);
   // if already bootloaded somewhere
   // immediately call the onLaunch method
-  // @ts-ignore
   if (cfg.bootloaded) {
     App.onLaunch(App.launchOptions);
   }

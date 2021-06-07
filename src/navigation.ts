@@ -11,8 +11,25 @@ let loaderDoc = null;
 let errorDoc = null;
 let modalDoc = null;
 
+interface Options {
+  type?: string;
+  title?: string;
+  message?: string;
+  template?: ((data: object) => string) | string;
+  templates?: {
+    status: { [key in number]: string };
+    loader: (data: object) => string;
+    error: null;
+  };
+  menu?: null;
+  status?: number;
+  data?: {
+    message: Options;
+  };
+}
+
 // default options
-let defaults = {
+let defaults: Options = {
   templates: {
     status: {},
     loader: null,
@@ -59,8 +76,8 @@ function getLoaderDoc(message) {
  * @param  {Object|String} message          Error page configuration or error message
  * @return {Document}                       A newly created error document
  */
-function getErrorDoc(message) {
-  let cfg: any = {};
+function getErrorDoc(message: Options) {
+  let cfg: Options = {};
   if (_.isPlainObject(message)) {
     cfg = message;
     if (cfg.status && !cfg.template && defaults.templates.status[cfg.status]) {
@@ -117,7 +134,7 @@ function initMenu() {
  * @param  {Object} cfg         The configurations
  * @return {Document}           The created document
  */
-function show(cfg: any = {}) {
+function show(cfg: ((data: object) => string) | Options) {
   if (_.isFunction(cfg)) {
     cfg = {
       template: cfg,
@@ -183,7 +200,7 @@ function showLoading(cfg = {}) {
  * @param  {Object|Function|Boolean} cfg    The configuration options or the template function or boolean to hide the error
  * @return {Document}                       The created error document.
  */
-function showError(cfg = {}) {
+function showError(cfg: Options) {
   if (_.isBoolean(cfg) && !cfg && errorDoc) {
     // hide error
     navigationDocument.removeDocument(errorDoc);
@@ -372,8 +389,7 @@ function navigate(page, options, replace) {
         // warn and set the status to 500
         if (error instanceof Error) {
           console.error(`There was an error in the page code. ${error}`);
-          // @ts-ignore
-          error.status = "500";
+          Object.assign(error, { status: "500" });
         }
         // try showing a status level error page if it exists
         let statusLevelErrorTpls = defaults.templates.status;
