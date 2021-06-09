@@ -10,17 +10,17 @@ let created = false;
 
 // few private instances
 let doc = Parser.dom(docStr);
-let menuBarEl = doc.getElementsByTagName("menuBar").item(0);
-let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0);
+let menuBarEl = doc.getElementsByTagName("menuBar").item(0) as MenuBarElement;
+let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0) as Element;
 let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
-let itemsCache = {};
+let itemsCache: { [key in string]: MenuItem } = {};
 
 interface Options {
   attributes: {};
   rootTemplateAttributes: {};
   items: [];
-  loadingMessage?: (() => string) | string;
-  errorMessage?: (() => string) | string;
+  loadingMessage: (() => string) | string;
+  errorMessage: (() => string) | string;
 }
 
 // default menu options
@@ -28,6 +28,8 @@ let defaults: Options = {
   attributes: {},
   rootTemplateAttributes: {},
   items: [],
+  loadingMessage: "",
+  errorMessage: "",
 };
 
 /**
@@ -52,7 +54,7 @@ function setOptions(cfg = {}) {
  * @param {Element} el 			The element to set attributes on
  * @param {Object} attributes 	Attributes key value pairs.
  */
-function setAttributes(el, attributes) {
+function setAttributes(el: Element, attributes: object) {
   console.log("setting attributes on element...", el, attributes);
   _.each(attributes, (value, name) => el.setAttribute(name, value));
 }
@@ -180,7 +182,7 @@ function create(cfg = {}) {
  * @param {Document} doc        	The document to associate with the menuitem
  * @param {String} menuItemid		The id of the menu item as per the configuration
  */
-function setDocument(doc, menuItemid) {
+function setDocument(doc: Document, menuItemid: string) {
   let menuItem = itemsCache[menuItemid];
 
   if (!menuItem) {
@@ -200,7 +202,7 @@ function setDocument(doc, menuItemid) {
  *
  * @param {String} menuItemid 		The id of the menu item as per the configuration
  */
-function setSelectedItem(menuItemid) {
+function setSelectedItem(menuItemid: string) {
   let menuItem = itemsCache[menuItemid];
 
   if (!menuItem) {

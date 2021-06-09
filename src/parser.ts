@@ -11,7 +11,7 @@ const xmlPrefix = '<?xml version="1.0" encoding="UTF-8" ?>'; // xml prefix
  * @param  {Object} [data]          The data that will be applied to the function
  * @return {Document}               A new Document
  */
-function parse(s, data) {
+function parse(s: string | ((data: object) => string), data: object) {
   // if a template function is provided, call the function with data
   s = _.isFunction(s) ? s(data) : s;
 
@@ -41,7 +41,7 @@ export default {
    * @param  {Object} [data]          The data that will be applied to the function
    * @return {Document}               A new Document
    */
-  dom(s, data = []) {
+  dom(s: string | ((data: object) => string), data: object | object[] = []) {
     return parse(s, data);
   },
 };

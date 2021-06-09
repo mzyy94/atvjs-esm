@@ -9,7 +9,20 @@ import Handler from "./handler";
  * @private
  * @type {Object}
  */
-let pages = {};
+let pages: { [key in string]: any } = {};
+
+interface Options {
+  style: string;
+  template(data: object): string;
+  data(d: object): object;
+  options: {
+    responseType: "json" | "text";
+  };
+  ready?: Function;
+  afterReady?: Function;
+  url?: string;
+  onError?: Function;
+}
 
 /**
  * Page level defaults that needs to be overridden.
@@ -17,7 +30,7 @@ let pages = {};
  * @private
  * @type {Object}
  */
-const defaults = {
+const defaults: Options = {
   /**
    * Default styles (override with the required style)
    * @type {String}
@@ -29,7 +42,7 @@ const defaults = {
    * @param  {Object} data    The data associated with the template
    * @return {string}         The final TVML template string.
    */
-  template(data) {
+  template(data: object) {
     console.warn("No template exists!");
     return "";
   },
@@ -39,7 +52,7 @@ const defaults = {
    * @param  {Object} d   The data object
    * @return {Obect}      The transformed data
    */
-  data(d) {
+  data(d: object) {
     return d;
   },
   /**
@@ -76,16 +89,16 @@ function setOptions(cfg = {}) {
  * @param  {String} style Style string
  * @param  {Document} doc   The document to add styles on
  */
-function appendStyle(style, doc) {
+function appendStyle(style: string, doc: Document) {
   if (!_.isString(style) || !doc) {
     console.log("invalid document or style string...", style, doc);
     return;
   }
-  let docEl = doc.getElementsByTagName("document").item(0);
+  let docEl = doc.getElementsByTagName("document").item(0) as Element;
   let styleString = ["<style>", style, "</style>"].join("");
-  let headTag = doc.getElementsByTagName("head");
+  let headTags = doc.getElementsByTagName("head");
 
-  headTag = headTag && headTag.item(0);
+  let headTag = headTags && headTags.item(0);
   if (!headTag) {
     headTag = doc.createElement("head");
     docEl.insertBefore(headTag, docEl.firstChild);
@@ -102,7 +115,7 @@ function appendStyle(style, doc) {
  * @param  {Document} doc       The document to prepare
  * @return {Document}           The document passed
  */
-function prepareDom(doc, cfg: Partial<typeof defaults> = {}) {
+function prepareDom(doc: Document, cfg: Partial<typeof defaults> = {}) {
   if (!(doc instanceof Document)) {
     console.warn("Cannnot prepare, the provided element is not a document.");
     return;
@@ -110,7 +123,7 @@ function prepareDom(doc, cfg: Partial<typeof defaults> = {}) {
   // apply defaults
   _.defaults(cfg, defaults);
   // append any default styles
-  appendStyle(cfg.style, doc);
+  appendStyle(cfg.style as string, doc);
   // attach event handlers
   Handler.addAll(doc, cfg);
 
@@ -128,13 +141,13 @@ function prepareDom(doc, cfg: Partial<typeof defaults> = {}) {
  * @param  {Object} response        The data object
  * @return {Document}               The newly created document
  */
-function makeDom(cfg, response = []) {
+function makeDom(cfg: Options, response: object = []) {
   // apply defaults
   _.defaults(cfg, defaults);
   // create Document
   let doc = Parser.dom(
     cfg.template,
-    _.isPlainObject(cfg.data) ? cfg.data : cfg.data(response)
+    _.isPlainObject(cfg.data) ? cfg.data : cfg.data?.(response)
   );
   // prepare the Document
   prepareDom(doc, cfg);
@@ -157,8 +170,8 @@ function makeDom(cfg, response = []) {
  * @param  {Object} cfg     The page configuration object
  * @return {Function}       A function that returns promise upon execution
  */
-function makePage(cfg) {
-  return (options) => {
+function makePage(cfg: Options) {
+  return (options: Options) => {
     _.defaultsDeep(cfg, defaults);
 
     console.log("making page... options:", cfg);
@@ -173,7 +186,7 @@ function makePage(cfg) {
         // if the response param is null/falsy value, resolve with null (usefull for catching and supressing any navigation later)
         cfg.ready(
           options,
-          (response) =>
+          (response: object) =>
             resolve(
               response || _.isUndefined(response)
                 ? makeDom(cfg, response)
@@ -267,7 +280,7 @@ export default {
    * @param  {Object} cfg             Page configuration options
    * @return {Function}               A function that returns promise upon execution
    */
-  create(name, cfg) {
+  create(name: string, cfg: { name: string }) {
     console.log("creating page... name:", name);
 
     if (_.isObject(name)) {
@@ -289,7 +302,7 @@ export default {
     if (pages[name]) {
       console.warn(`The given page name ${name} already exists! Overriding...`);
     }
-    let p = makePage(cfg);
+    let p = makePage(cfg as any);
     // cache for later user
     pages[name] = p;
     // merge configurations on the page
@@ -310,7 +323,7 @@ export default {
    * @param  {string} name    Name of the previously created page
    * @return {Page}           Page function
    */
-  get(name) {
+  get(name: string) {
     return pages[name];
   },
   prepareDom: prepareDom,

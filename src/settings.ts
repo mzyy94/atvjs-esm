@@ -14,7 +14,7 @@ const lib = {
    * @param {String} key 				The key
    * @param {Object|String} val 		The value to store
    */
-  set(key, val) {
+  set(key: string, val: string | object) {
     // convert all values to string for proper compression
     if (!_.isUndefined(val)) {
       val = JSON.stringify(val);
@@ -33,15 +33,15 @@ const lib = {
    * @param  {String} key 		The key
    * @return {Object|String}     	The stored value
    */
-  get(key) {
+  get(key: string) {
     let item = localStorage.getItem(key);
     let val;
 
-    if (!_.isUndefined(item)) {
+    if (!_.isNil(item)) {
       item = LZString.decompress(item);
     }
     try {
-      val = JSON.parse(item);
+      val = JSON.parse(item as string);
     } catch (ex) {
       val = item;
     }
@@ -55,7 +55,7 @@ const lib = {
    *
    * @param  {String|Array} keys 		The key(s) to remove.
    */
-  remove(keys) {
+  remove(keys: string | string[]) {
     if (!_.isArray(keys)) {
       keys = [keys];
     }

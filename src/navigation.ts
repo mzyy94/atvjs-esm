@@ -6,10 +6,10 @@ import Menu from "./menu";
 import "tvml";
 
 // few private variables
-let menuDoc = null;
-let loaderDoc = null;
-let errorDoc = null;
-let modalDoc = null;
+let menuDoc: Document | null | undefined = null;
+let loaderDoc: Document | null | undefined = null;
+let errorDoc: Document | null | undefined = null;
+let modalDoc: Document | null | undefined = null;
 
 interface Options {
   type?: string;
@@ -17,9 +17,9 @@ interface Options {
   message?: string;
   template?: ((data: object) => string) | string;
   templates?: {
-    status: { [key in number]: string };
-    loader: (data: object) => string;
-    error: null;
+    status?: { [key in string]: string };
+    loader?: (data: object) => string;
+    error?: string;
   };
   menu?: null;
   status?: number;
@@ -32,8 +32,6 @@ interface Options {
 let defaults: Options = {
   templates: {
     status: {},
-    loader: null,
-    error: null,
   },
   menu: null,
 };
@@ -60,8 +58,8 @@ function setOptions(cfg = {}) {
  * @param  {String} message         Loading message
  * @return {Document}               A newly created loader document
  */
-function getLoaderDoc(message) {
-  let tpl = defaults.templates.loader;
+function getLoaderDoc(message: string) {
+  let tpl = defaults.templates?.loader;
   let str = (tpl && tpl({ message: message })) || "<document></document>";
 
   return Parser.dom(str);
@@ -80,15 +78,19 @@ function getErrorDoc(message: Options) {
   let cfg: Options = {};
   if (_.isPlainObject(message)) {
     cfg = message;
-    if (cfg.status && !cfg.template && defaults.templates.status[cfg.status]) {
+    if (
+      cfg.status &&
+      !cfg.template &&
+      defaults.templates?.status?.[cfg.status]
+    ) {
       cfg.template = defaults.templates.status[cfg.status];
     }
   } else {
-    cfg.template = defaults.templates.error || (() => "<document></document>");
+    cfg.template = defaults.templates?.error || (() => "<document></document>");
     cfg.data = { message: message };
   }
 
-  return Page.makeDom(cfg);
+  return Page.makeDom(cfg as any);
 }
 
 /**
@@ -152,7 +154,7 @@ function show(cfg: ((data: object) => string) | Options) {
     doc = presentModal(cfg);
   } else {
     // no document on the navigation stack, show as a document
-    doc = Page.makeDom(cfg);
+    doc = Page.makeDom(cfg as any);
     cleanNavigate(doc);
   }
   return doc;
@@ -178,7 +180,7 @@ function showLoading(cfg = {}) {
   }
   // use default loading template if not passed as a configuration
   _.defaultsDeep(cfg, {
-    template: defaults.templates.loader,
+    template: defaults.templates?.loader,
     type: "modal",
   });
 
@@ -215,7 +217,7 @@ function showError(cfg: Options) {
   }
   // use default error template if not passed as a configuration
   _.defaultsDeep(cfg, {
-    template: defaults.templates.error,
+    template: defaults.templates?.error,
   });
 
   console.log("showing error... options:", cfg);
@@ -233,7 +235,7 @@ function showError(cfg: Options) {
  *
  * @param  {Document} doc       The document to push to the navigation stack
  */
-function pushDocument(doc) {
+function pushDocument(doc: Document) {
   if (!(doc instanceof Document)) {
     console.warn("Cannot navigate to the document.", doc);
     return;
@@ -251,7 +253,7 @@ function pushDocument(doc) {
  * @param  {Document} doc               The document to push
  * @param  {Document} docToReplace      The document to replace
  */
-function replaceDocument(doc, docToReplace) {
+function replaceDocument(doc: Document, docToReplace: Document) {
   if (!(doc instanceof Document) || !(docToReplace instanceof Document)) {
     console.warn("Cannot replace document.");
     return;
@@ -268,10 +270,10 @@ function replaceDocument(doc, docToReplace) {
  * @param   {Boolean} [replace=false]   Whether to replace the last document from the navigation stack
  * @return  {Document}                  The current document on the stack
  */
-function cleanNavigate(doc, replace = false) {
+function cleanNavigate(doc: Document, replace = false) {
   let navigated = false;
   let docs = navigationDocument.documents;
-  let last = getLastDocumentFromStack();
+  let last: Document | null = getLastDocumentFromStack();
 
   if (!replace && (!last || (last !== loaderDoc && last !== errorDoc))) {
     pushDocument(doc);
@@ -283,7 +285,7 @@ function cleanNavigate(doc, replace = false) {
     errorDoc = null;
   }
   // determine the current document on the navigation stack
-  last = replace && getLastDocumentFromStack();
+  last = replace ? getLastDocumentFromStack() : null;
   // if replace is passed as a param and there is some document on the top of stack
   if (last) {
     console.log("replacing current document...");
@@ -334,7 +336,11 @@ function navigateToMenuPage() {
  * @param  {Boolean} replace    Replace the previous page.
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
-function navigate(page, options, replace) {
+function navigate(
+  page: string,
+  options: { replace?: boolean },
+  replace: boolean
+) {
   let p = Page.get(page);
 
   if (_.isBoolean(options)) {
@@ -353,7 +359,7 @@ function navigate(page, options, replace) {
   return new Promise((resolve, reject) => {
     if (!p) {
       console.error(page, "page does not exist!");
-      let tpl = defaults.templates.status["404"];
+      let tpl = defaults.templates?.status?.["404"];
       if (tpl) {
         let doc = showError({
           template: tpl,
@@ -368,7 +374,7 @@ function navigate(page, options, replace) {
     }
 
     p(options).then(
-      (doc) => {
+      (doc: Document) => {
         // support suppressing of navigation since there is no dom available (page resolved with empty document)
         if (doc) {
           // if page is a modal, show as modal window
@@ -384,7 +390,7 @@ function navigate(page, options, replace) {
         // resolve promise
         resolve(doc);
       },
-      (error) => {
+      (error: Error & { status: string; response?: unknown }) => {
         // something went wrong during the page execution
         // warn and set the status to 500
         if (error instanceof Error) {
@@ -392,8 +398,8 @@ function navigate(page, options, replace) {
           Object.assign(error, { status: "500" });
         }
         // try showing a status level error page if it exists
-        let statusLevelErrorTpls = defaults.templates.status;
-        let tpl = statusLevelErrorTpls[error.status];
+        let statusLevelErrorTpls = defaults.templates?.status;
+        let tpl = statusLevelErrorTpls?.[error.status];
         if (tpl) {
           showError(
             _.defaults(
@@ -425,14 +431,16 @@ function navigate(page, options, replace) {
  * @param  {Document|String|Object} modal       The TVML string/document representation of the modal window or a configuration object to create modal from
  * @return {Document}                           The created modal document
  */
-function presentModal(modal) {
-  let doc = modal; // assume a document object is passed
+function presentModal(modal: Document | string | object) {
+  let doc: Document; // assume a document object is passed
   if (_.isString(modal)) {
     // if a modal document string is passed
     doc = Parser.dom(modal);
   } else if (_.isPlainObject(modal)) {
     // if a modal page configuration is passed
-    doc = Page.makeDom(modal);
+    doc = Page.makeDom(modal as any);
+  } else {
+    doc = modal as Document;
   }
   navigationDocument.presentModal(doc);
   modalDoc = doc;
@@ -470,7 +478,7 @@ function clear() {
  *
  * @param  {Document} [doc]     The document until which we need to pop.
  */
-function pop(doc = null) {
+function pop(doc: Document | null = null) {
   if (doc instanceof Document) {
     _.defer(() => navigationDocument.popToDocument(doc));
   } else {

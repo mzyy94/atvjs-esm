@@ -24,9 +24,9 @@ const configMap = {
 /**
  * Start options.
  */
-interface Options {
+type Options = {
   bootloaded?: boolean;
-}
+} & { [key in string]: (opt: object) => void };
 
 // indicate whether the application was started
 let started = false;
@@ -136,12 +136,12 @@ let libs = {
  *
  * @param  {Object} cfg 	All configuration options relevant to the libraries
  */
-function initLibraries(cfg = {}) {
+function initLibraries(cfg: Options = {}) {
   _.each(configMap, (keys, libName) => {
-    let lib = libs[libName];
-    let options = {};
+    let lib = libs[libName as keyof typeof libs];
+    let options: Options = {};
     _.each(keys, (key) => (options[key] = cfg[key]));
-    lib.setOptions && lib.setOptions(options);
+    "setOptions" in lib && lib.setOptions(options as object);
   });
 }
 
@@ -153,7 +153,7 @@ const handlers = {
    * @event onLaunch
    * @alias module:ATV#onLaunch
    */
-  onLaunch(options = {}, fn) {
+  onLaunch(options = {}, fn: (opt: object) => void) {
     Object.assign(libs, { launchOptions: options });
     console.log("launching application...");
     fn(options);
@@ -164,7 +164,7 @@ const handlers = {
    * @event onError
    * @alias module:ATV#onError
    */
-  onError(options = {}, fn) {
+  onError(options = {}, fn: (opt: object) => void) {
     console.log("an error occurred in the application...");
     fn(options);
   },
@@ -174,7 +174,7 @@ const handlers = {
    * @event onResume
    * @alias module:ATV#onResume
    */
-  onResume(options = {}, fn) {
+  onResume(options = {}, fn: (opt: object) => void) {
     console.log("resuming application...");
     fn(options);
   },
@@ -184,7 +184,7 @@ const handlers = {
    * @event onSuspend
    * @alias module:ATV#onSuspend
    */
-  onSuspend(options = {}, fn) {
+  onSuspend(options = {}, fn: (opt: object) => void) {
     console.log("suspending application...");
     fn(options);
   },
@@ -194,7 +194,7 @@ const handlers = {
    * @event onExit
    * @alias module:ATV#onExit
    */
-  onExit(options = {}, fn) {
+  onExit(options = {}, fn: (opt: object) => void) {
     console.log("exiting application...");
     fn(options);
   },
@@ -204,7 +204,7 @@ const handlers = {
    * @event onReload
    * @alias module:ATV#onReload
    */
-  onReload(options = {}, fn) {
+  onReload(options = {}, fn: (opt: object) => void) {
     console.log("reloading application...");
     fn(options);
   },
@@ -217,7 +217,7 @@ const handlers = {
  *
  * @param  {Object} cfg 	All configuration options relevant to the App.
  */
-function initAppHandlers(cfg = {}) {
+function initAppHandlers(cfg: { [key in string]: (opt: object) => void } = {}) {
   _.each(
     handlers,
     (handler, name) =>
@@ -372,7 +372,7 @@ function start(cfg: Options = {}) {
  * @param  {Object} [options]           Options value. {when: 'now'} // or 'onResume'
  * @param  {Object} [reloadData]        Custom data that needs to be passed while reloading the app
  */
-function reload(options, reloadData) {
+function reload(options: object, reloadData: object) {
   App.onReload(options);
   App.reload(options, reloadData);
 }

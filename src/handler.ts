@@ -40,22 +40,23 @@ let handlers = {
      * @private
      * @param  {Event} e    The event passed while this handler is invoked.
      */
-    onLinkClick(e) {
-      let element = e.target;
+    onLinkClick(e: Event) {
+      let element = e.target as Element;
       let page = element.getAttribute(hrefAttribute);
-      let replace = element.getAttribute(hrefPageReplaceAttribute);
+      let replace = element.getAttribute(hrefPageReplaceAttribute) == "true";
 
       if (!page) return;
 
-      let options = element.getAttribute(hrefOptionsAttribute);
-      options = options || "{}";
+      let attr = element.getAttribute(hrefOptionsAttribute);
+      attr = attr || "{}";
+      let options = {};
 
       // try to make the options object
       try {
-        options = JSON.parse(options);
+        options = JSON.parse(attr);
       } catch (ex) {
         console.warn(
-          `Invalid value for the page options (${hrefOptionsAttribute}=${options}) in the template.`
+          `Invalid value for the page options (${hrefOptionsAttribute}=${attr}) in the template.`
         );
         options = {};
       }
@@ -82,8 +83,8 @@ let handlers = {
      * @private
      * @param  {Event} e    The event passed while this handler was invoked
      */
-    onModalCloseBtnClick(e) {
-      let element = e.target;
+    onModalCloseBtnClick(e: Event) {
+      let element = e.target as Element;
       let closeBtn = element.getAttribute(modalCloseBtnAttribute);
 
       if (closeBtn) {
@@ -99,9 +100,9 @@ let handlers = {
      * @private
      * @param  {Event} e    The event passed while this handler was invoked
      */
-    onMenuItemSelect(e) {
-      let element = e.target;
-      let menuId = element.getAttribute("id");
+    onMenuItemSelect(e: Event) {
+      let element = e.target as MenuItem;
+      let menuId = element.getAttribute("id") as string;
       let elementType = element.nodeName.toLowerCase();
       let page = element.page;
 
@@ -179,8 +180,8 @@ function setOptions(cfg: Partial<{ handlers: typeof handlers }> = {}) {
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
 function setListeners(
-  doc,
-  cfg: Partial<{ events: { [key in string]: [Function] } }> = {},
+  doc: Document,
+  cfg: { [key in string]?: Function | { [key in string]: Function[] } } = {},
   add = true
 ) {
   if (!doc || !(doc instanceof Document)) {
@@ -196,7 +197,7 @@ function setListeners(
 
     _.each(events, (fns, e) => {
       let [ev, selector] = e.split(" ");
-      let elements = null;
+      let elements: ArrayLike<Element | Document> | Error = [];
       if (!_.isArray(fns)) {
         // support list of event handlers
         fns = [fns];
@@ -249,7 +250,7 @@ function setListeners(
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
-function addListeners(doc, cfg) {
+function addListeners(doc: Document, cfg: object) {
   setListeners(doc, cfg, true);
 }
 
@@ -276,7 +277,7 @@ function addListeners(doc, cfg) {
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
-function removeListeners(doc, cfg) {
+function removeListeners(doc: Document, cfg: object) {
   setListeners(doc, cfg, false);
 }
 
@@ -288,7 +289,7 @@ function removeListeners(doc, cfg) {
  * @param {Document} doc            The document to set/unset listeners on.
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
-function setDefaultHandlers(doc, add = true) {
+function setDefaultHandlers(doc: Document, add = true) {
   if (!doc || !(doc instanceof Document)) {
     return;
   }
@@ -300,8 +301,9 @@ function setDefaultHandlers(doc, add = true) {
 
   // iterate over all the handlers and add it as an event listener on the doc
   for (let name in handlers) {
-    for (let key in handlers[name]) {
-      listenerFn.call(doc, name, handlers[name][key]);
+    for (let key in handlers[name as keyof typeof handlers]) {
+      const handler = handlers[name as keyof typeof handlers];
+      listenerFn.call(doc, name, handler[key as keyof typeof handler]);
     }
   }
 }
@@ -313,7 +315,7 @@ function setDefaultHandlers(doc, add = true) {
  *
  * @param {Document} doc        The document to add the listeners on.
  */
-function addDefaultHandlers(doc) {
+function addDefaultHandlers(doc: Document) {
   setDefaultHandlers(doc, true);
 }
 
@@ -324,7 +326,7 @@ function addDefaultHandlers(doc) {
  *
  * @param {Document} doc        The document to add the listeners on.
  */
-function removeDefaultHandlers(doc) {
+function removeDefaultHandlers(doc: Document) {
   setDefaultHandlers(doc, false);
 }
 
@@ -338,7 +340,7 @@ function removeDefaultHandlers(doc) {
  * @param {Obejct}  cfg             Page configuration object
  * @param {Boolean} [add=true]      Whether to add or remove the handlers
  */
-function setHandlers(doc, cfg, add = true) {
+function setHandlers(doc: Document, cfg: object, add = true) {
   if (add) {
     addDefaultHandlers(doc);
     addListeners(doc, cfg);
@@ -358,7 +360,7 @@ function setHandlers(doc, cfg, add = true) {
  * @param {Document}  doc           The page document.
  * @param {Obejct}  cfg             Page configuration object
  */
-function addHandlers(doc, cfg) {
+function addHandlers(doc: Document, cfg: object) {
   setHandlers(doc, cfg, true);
 }
 
@@ -372,7 +374,7 @@ function addHandlers(doc, cfg) {
  * @param {Document}  doc           The page document.
  * @param {Obejct}  cfg             Page configuration object
  */
-function removeHandlers(doc, cfg) {
+function removeHandlers(doc: Document, cfg: object) {
   setHandlers(doc, cfg, false);
 }
 

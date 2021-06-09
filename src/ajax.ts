@@ -48,8 +48,9 @@ function ajax(
   }
 
   if (typeof options === "undefined" && typeof url === "object" && url.url) {
+    const newUrl = url.url;
     options = url;
-    url = options.url;
+    url = newUrl;
   } else if (typeof url !== "string") {
     console.error("No url/options specified for the ajax.");
     throw new TypeError(
@@ -57,16 +58,16 @@ function ajax(
     );
   }
 
-  // default options
-  options = Object.assign({}, defaults, options, { method: method });
-
-  console.log(
-    `initiating ajax request... url: ${url}`,
-    " :: options:",
-    options
-  );
-
   return new Promise((resolve, reject) => {
+    // default options
+    options = Object.assign({}, defaults, options, { method: method });
+
+    console.log(
+      `initiating ajax request... url: ${url}`,
+      " :: options:",
+      options
+    );
+
     let xhr = new XMLHttpRequest();
 
     // set response type
@@ -75,15 +76,15 @@ function ajax(
     }
     // open connection
     xhr.open(
-      options.method,
+      options.method as string,
       url as string,
       typeof options.async === "undefined" ? true : options.async,
       options.user,
       options.password
     );
     // set headers
-    Object.keys(options.headers || {}).forEach(function (name) {
-      xhr.setRequestHeader(name, options.headers[name]);
+    Object.entries(options.headers ?? {}).forEach(function ([name, value]) {
+      xhr.setRequestHeader(name, value);
     });
     // listen to the state change
     xhr.onreadystatechange = () => {
@@ -120,7 +121,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  get(url, options) {
+  get(url: string, options: Options) {
     return ajax(url, options, "GET");
   },
   /**
@@ -137,7 +138,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  post(url, options) {
+  post(url: string, options: Options) {
     return ajax(url, options, "POST");
   },
   /**
@@ -149,7 +150,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  put(url, options) {
+  put(url: string, options: Options) {
     return ajax(url, options, "PUT");
   },
   /**
@@ -161,7 +162,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  del(url, options) {
+  del(url: string, options: Options) {
     return ajax(url, options, "DELETE");
   },
 };
