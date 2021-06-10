@@ -3,13 +3,13 @@
  */
 interface Options {
   responseType: "json" | "text";
-  url?: string;
-  method?: string;
-  user?: string;
-  password?: string;
-  async?: boolean;
-  headers?: { [key in string]: string };
-  data?: Document | BodyInit;
+  url: string;
+  method: string;
+  user: string;
+  password: string;
+  async: boolean;
+  headers: { [key in string]: string };
+  data: Document | BodyInit;
 }
 
 /**
@@ -18,7 +18,7 @@ interface Options {
  * @private
  * @type {Object}
  */
-const defaults: Options = {
+const defaults: Partial<Options> = {
   responseType: "json",
 };
 
@@ -39,28 +39,26 @@ const defaults: Options = {
  */
 function ajax(
   url: string | Options,
-  options?: Options,
+  options?: Partial<Options>,
   method = "GET"
 ): Promise<XMLHttpRequest> {
-  if (typeof url == "undefined") {
-    console.error("No url specified for the ajax.");
-    throw new TypeError("A URL is required for making the ajax request.");
-  }
-
   if (typeof options === "undefined" && typeof url === "object" && url.url) {
     const newUrl = url.url;
     options = url;
     url = newUrl;
   } else if (typeof url !== "string") {
     console.error("No url/options specified for the ajax.");
-    throw new TypeError(
-      "Options must be an object for making the ajax request."
+    return Promise.reject(
+      new TypeError("Options must be an object for making the ajax request.")
     );
   }
 
   return new Promise((resolve, reject) => {
     // default options
-    options = Object.assign({}, defaults, options, { method: method });
+    options = Object.assign({}, defaults, options);
+    if (options.method) {
+      method = options.method;
+    }
 
     console.log(
       `initiating ajax request... url: ${url}`,
@@ -76,7 +74,7 @@ function ajax(
     }
     // open connection
     xhr.open(
-      options.method as string,
+      method,
       url as string,
       typeof options.async === "undefined" ? true : options.async,
       options.user,
@@ -121,7 +119,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  get(url: string, options: Options) {
+  get(url: string, options: Partial<Options>) {
     return ajax(url, options, "GET");
   },
   /**
@@ -138,7 +136,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  post(url: string, options: Options) {
+  post(url: string, options: Partial<Options>) {
     return ajax(url, options, "POST");
   },
   /**
@@ -150,7 +148,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  put(url: string, options: Options) {
+  put(url: string, options: Partial<Options>) {
     return ajax(url, options, "PUT");
   },
   /**
@@ -162,7 +160,7 @@ const methods = {
    * @param  {Object} [options={@link defaults}]  Ajax options
    * @return {Promise}                            The Promise that resolves on ajax success
    */
-  del(url: string, options: Options) {
+  del(url: string, options: Partial<Options>) {
     return ajax(url, options, "DELETE");
   },
 };
@@ -176,4 +174,4 @@ Object.assign(ajax, methods);
  * @author eMAD <emad.alam@yahoo.com>
  *
  */
-export default ajax as unknown as typeof methods;
+export default ajax as typeof ajax & typeof methods;
