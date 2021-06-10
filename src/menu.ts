@@ -40,7 +40,7 @@ let defaults: Options = {
  *
  * @param {Object} cfg The configuration object
  */
-function setOptions(cfg = {}) {
+function setOptions(cfg: Partial<Options> = {}) {
   console.log("setting menu options...", cfg);
   // override the default options
   _.assign(defaults, cfg);
@@ -151,7 +151,7 @@ function addItem(item: Item) {
  * @param  {Object} cfg 		Menu related configurations
  * @return {Document}     		The created menu document
  */
-function create(cfg = {}) {
+function create(cfg: Partial<Options> = {}) {
   if (created) {
     console.warn("An instance of menu already exists, skipping creation...");
     return;
