@@ -10,6 +10,10 @@ const hrefPageReplaceAttribute = "data-href-page-replace";
 const modalCloseBtnAttribute = "data-alert-dissmiss";
 const menuItemReloadAttribute = "reloadOnSelect";
 
+type Config = {
+  events?: { [key in string]: (string | Function)[] | Function };
+} & { [key: string]: Function };
+
 /**
  * Page level default handlers.
  *
@@ -179,11 +183,7 @@ function setOptions(cfg: Partial<{ handlers: typeof handlers }> = {}) {
  * @param {Object} cfg              The page object configuration.
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
-function setListeners(
-  doc: Document,
-  cfg: { [key in string]?: Function | { [key in string]: Function[] } } = {},
-  add = true
-) {
+function setListeners(doc: Document, cfg: Config = {}, add = true) {
   if (!doc || !(doc instanceof Document)) {
     return;
   }
@@ -212,13 +212,14 @@ function setListeners(
       _.each(fns, (fn) => {
         fn = _.isString(fn) ? cfg[fn] : fn; // assume the function to be present on the page configuration obeject
         if (_.isFunction(fn)) {
+          let f = fn;
           console.log(
             (add ? "adding" : "removing") + " event on documents...",
             ev,
             elements
           );
           _.each(elements, (el) =>
-            listenerFn.call(el, ev, (e) => fn.call(cfg, e))
+            listenerFn.call(el, ev, (e) => f.call(cfg, e))
           ); // bind to the original configuration object
         }
       });
@@ -250,7 +251,7 @@ function setListeners(
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
-function addListeners(doc: Document, cfg: object) {
+function addListeners(doc: Document, cfg: Config) {
   setListeners(doc, cfg, true);
 }
 
@@ -277,7 +278,7 @@ function addListeners(doc: Document, cfg: object) {
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
-function removeListeners(doc: Document, cfg: object) {
+function removeListeners(doc: Document, cfg: Config) {
   setListeners(doc, cfg, false);
 }
 
@@ -300,12 +301,11 @@ function setDefaultHandlers(doc: Document, add = true) {
   }
 
   // iterate over all the handlers and add it as an event listener on the doc
-  for (let name in handlers) {
-    for (let key in handlers[name as keyof typeof handlers]) {
-      const handler = handlers[name as keyof typeof handlers];
-      listenerFn.call(doc, name, handler[key as keyof typeof handler]);
-    }
-  }
+  _.each(handlers, (handler, name) => {
+    _.each(handler, (callback) => {
+      listenerFn.call(doc, name, callback);
+    });
+  });
 }
 
 /**
@@ -340,7 +340,7 @@ function removeDefaultHandlers(doc: Document) {
  * @param {Obejct}  cfg             Page configuration object
  * @param {Boolean} [add=true]      Whether to add or remove the handlers
  */
-function setHandlers(doc: Document, cfg: object, add = true) {
+function setHandlers(doc: Document, cfg: Config, add = true) {
   if (add) {
     addDefaultHandlers(doc);
     addListeners(doc, cfg);
@@ -360,7 +360,7 @@ function setHandlers(doc: Document, cfg: object, add = true) {
  * @param {Document}  doc           The page document.
  * @param {Obejct}  cfg             Page configuration object
  */
-function addHandlers(doc: Document, cfg: object) {
+function addHandlers(doc: Document, cfg: Config) {
   setHandlers(doc, cfg, true);
 }
 
@@ -374,7 +374,7 @@ function addHandlers(doc: Document, cfg: object) {
  * @param {Document}  doc           The page document.
  * @param {Obejct}  cfg             Page configuration object
  */
-function removeHandlers(doc: Document, cfg: object) {
+function removeHandlers(doc: Document, cfg: Config) {
   setHandlers(doc, cfg, false);
 }
 
