@@ -1,7 +1,7 @@
 import _ from "lodash";
 import Parser from "./parser";
 import Ajax from "./ajax";
-import Handler from "./handler";
+import Handler, { Config as HandlerConfig } from "./handler";
 
 /**
  * Created pages cache.
@@ -9,12 +9,15 @@ import Handler from "./handler";
  * @private
  * @type {Object}
  */
-let pages: { [key in string]: any } = {};
+let pages = new Map<string, Page>();
 
-interface Options {
+type Page = (options: PageOptions) => Promise<Document | null>;
+type Template = ((data: object) => string) | string;
+
+export interface Options {
   style: string;
-  template(data: object): string;
-  data(d: object): object;
+  template: Template;
+  data: ((d: object) => object) | object;
   options: {
     responseType: "json" | "text";
   };
@@ -22,6 +25,10 @@ interface Options {
   afterReady?: Function;
   url?: string;
   onError?: Function;
+}
+
+export interface PageOptions {
+  replace?: boolean;
 }
 
 /**
@@ -115,7 +122,7 @@ function appendStyle(style: string, doc: Document) {
  * @param  {Document} doc       The document to prepare
  * @return {Document}           The document passed
  */
-function prepareDom(doc: Document, cfg: Partial<typeof defaults> = {}) {
+function prepareDom(doc: Document, cfg: Partial<Options> & HandlerConfig = {}) {
   if (!(doc instanceof Document)) {
     console.warn("Cannnot prepare, the provided element is not a document.");
     return;
@@ -141,13 +148,13 @@ function prepareDom(doc: Document, cfg: Partial<typeof defaults> = {}) {
  * @param  {Object} response        The data object
  * @return {Document}               The newly created document
  */
-function makeDom(cfg: Options, response: object = []) {
+function makeDom(cfg: Options & HandlerConfig, response: object = []) {
   // apply defaults
   _.defaults(cfg, defaults);
   // create Document
   let doc = Parser.dom(
     cfg.template,
-    _.isPlainObject(cfg.data) ? cfg.data : cfg.data?.(response)
+    _.isFunction(cfg.data) ? cfg.data(response) : cfg.data
   );
   // prepare the Document
   prepareDom(doc, cfg);
@@ -170,15 +177,15 @@ function makeDom(cfg: Options, response: object = []) {
  * @param  {Object} cfg     The page configuration object
  * @return {Function}       A function that returns promise upon execution
  */
-function makePage(cfg: Options) {
-  return (options: Options) => {
+function makePage(cfg: Options & HandlerConfig): Page {
+  return (options: PageOptions) => {
     _.defaultsDeep(cfg, defaults);
 
     console.log("making page... options:", cfg);
 
     // return a promise that resolves after completion of the ajax request
     // if no ready method or url configuration exist, the promise is resolved immediately and the resultant dom is returned
-    return new Promise((resolve, reject) => {
+    return new Promise<Document | null>((resolve, reject) => {
       if (_.isFunction(cfg.ready)) {
         // if present, call the ready function
         console.log("calling page ready... options:", options);
@@ -186,7 +193,7 @@ function makePage(cfg: Options) {
         // if the response param is null/falsy value, resolve with null (usefull for catching and supressing any navigation later)
         cfg.ready(
           options,
-          (response: object) =>
+          (response: Options & HandlerConfig) =>
             resolve(
               response || _.isUndefined(response)
                 ? makeDom(cfg, response)
@@ -299,15 +306,16 @@ export default {
     }
 
     // warn in case the page already exists
-    if (pages[name]) {
+    if (pages.has(name)) {
       console.warn(`The given page name ${name} already exists! Overriding...`);
     }
+    // FIXME: Remove any
     let p = makePage(cfg as any);
     // cache for later user
-    pages[name] = p;
+    pages.set(name, p);
     // merge configurations on the page
     // FIXME: failed with merging read-only property.
-    // _.assign(p, cfg);
+    _.assign(p, cfg);
     // return the created page to allow chaining
     return p;
   },
@@ -324,7 +332,7 @@ export default {
    * @return {Page}           Page function
    */
   get(name: string) {
-    return pages[name];
+    return pages.get(name);
   },
   prepareDom: prepareDom,
   makeDom: makeDom,

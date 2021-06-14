@@ -1,15 +1,15 @@
 import _ from "lodash";
-import Page from "./page";
+import Page, { PageOptions } from "./page";
 import Parser from "./parser";
 import Menu from "./menu";
 
 import "tvml";
 
 // few private variables
-let menuDoc: Document | null | undefined = null;
-let loaderDoc: Document | null | undefined = null;
-let errorDoc: Document | null | undefined = null;
-let modalDoc: Document | null | undefined = null;
+let menuDoc: Document | null = null;
+let loaderDoc: Document | null = null;
+let errorDoc: Document | null = null;
+let modalDoc: Document | null = null;
 
 interface Options {
   type?: string;
@@ -146,14 +146,15 @@ function show(cfg: ((data: object) => string) | Options) {
   // no template exists, cannot proceed
   if (!cfg.template) {
     console.warn("No template found!");
-    return;
+    return null;
   }
-  let doc = null;
+  let doc: Document | null = null;
   if (getLastDocumentFromStack() && cfg.type === "modal") {
     // show as a modal if there is something on the navigation stack
     doc = presentModal(cfg);
   } else {
     // no document on the navigation stack, show as a document
+    // FIXME: Remove any
     doc = Page.makeDom(cfg as any);
     cleanNavigate(doc);
   }
@@ -336,11 +337,7 @@ function navigateToMenuPage() {
  * @param  {Boolean} replace    Replace the previous page.
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
-function navigate(
-  page: string,
-  options: { replace?: boolean },
-  replace: boolean
-) {
+function navigate(page: string, options: PageOptions, replace: boolean) {
   let p = Page.get(page);
 
   if (_.isBoolean(options)) {
@@ -374,11 +371,11 @@ function navigate(
     }
 
     p(options).then(
-      (doc: Document) => {
+      (doc) => {
         // support suppressing of navigation since there is no dom available (page resolved with empty document)
         if (doc) {
           // if page is a modal, show as modal window
-          if (p.type === "modal") {
+          if ((p as { type?: "modal" }).type === "modal") {
             // defer to avoid clashes with any ongoing process (tvmlkit weird behavior -_-)
             _.defer(presentModal, doc);
           } else {

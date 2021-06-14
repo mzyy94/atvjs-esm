@@ -10,7 +10,7 @@ const hrefPageReplaceAttribute = "data-href-page-replace";
 const modalCloseBtnAttribute = "data-alert-dissmiss";
 const menuItemReloadAttribute = "reloadOnSelect";
 
-type Config = {
+export type Config = {
   events?: { [key in string]: (string | Function)[] | Function };
 } & { [key: string]: Function };
 

@@ -24,6 +24,7 @@ const configMap = {
 /**
  * Start options.
  */
+// FIXME: Remove unknonw func
 type Options = {
   bootloaded?: boolean;
 } & { [key in string]: (opt: object) => void };
@@ -372,7 +373,7 @@ function start(cfg: Options = {}) {
  * @param  {Object} [options]           Options value. {when: 'now'} // or 'onResume'
  * @param  {Object} [reloadData]        Custom data that needs to be passed while reloading the app
  */
-function reload(options: object, reloadData: object) {
+function reload(options: { when: "now" | "onResume" }, reloadData: object) {
   App.onReload(options);
   App.reload(options, reloadData);
 }

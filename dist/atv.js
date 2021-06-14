@@ -18154,7 +18154,7 @@ function ajax(url, options, method = "GET") {
             xhr.responseType = options.responseType;
         }
         // open connection
-        xhr.open(options.method, url, typeof options.async === "undefined" ? true : options.async, options.user, options.password);
+        xhr.open(        options.method, url, typeof options.async === "undefined" ? true : options.async, options.user, options.password);
         // set headers
         Object.entries(options.headers ?? {}).forEach(function ([name, value]) {
             xhr.setRequestHeader(name, value);
@@ -18455,6 +18455,7 @@ var Menu = {
 };
 
 // few private variables
+// FIXME: Create nullable type
 let menuDoc = null;
 let loaderDoc = null;
 let errorDoc = null;
@@ -18572,6 +18573,7 @@ function show(cfg) {
     }
     else {
         // no document on the navigation stack, show as a document
+        // FIXME: Remove any
         doc = Page.makeDom(cfg);
         cleanNavigate(doc);
     }
@@ -18736,7 +18738,9 @@ function navigateToMenuPage() {
  * @param  {Boolean} replace    Replace the previous page.
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
-function navigate(page, options, replace) {
+function navigate(page, 
+// FIXME: Add interface
+options, replace) {
     let p = Page.get(page);
     if (_.isBoolean(options)) {
         replace = options;
@@ -19086,7 +19090,9 @@ function setOptions$1(cfg = {}) {
  * @param {Object} cfg              The page object configuration.
  * @param {Boolean} [add=true]      Whether to add or remove listeners. Defaults to true (add)
  */
-function setListeners(doc, cfg = {}, add = true) {
+function setListeners(doc, 
+// FIXME: Create interface
+cfg = {}, add = true) {
     if (!doc || !(doc instanceof Document)) {
         return;
     }
@@ -19145,6 +19151,7 @@ function setListeners(doc, cfg = {}, add = true) {
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
+// FIXME: Remove object
 function addListeners(doc, cfg) {
     setListeners(doc, cfg, true);
 }
@@ -19171,6 +19178,7 @@ function addListeners(doc, cfg) {
  * @param {Document} doc            The document to add the listeners on.
  * @param {Object} cfg              The page object configuration.
  */
+// FIXME: Remove object
 function removeListeners(doc, cfg) {
     setListeners(doc, cfg, false);
 }
@@ -19192,6 +19200,7 @@ function setDefaultHandlers(doc, add = true) {
     }
     // iterate over all the handlers and add it as an event listener on the doc
     for (let name in handlers$1) {
+        // FIXME: for each
         for (let key in handlers$1[name]) {
             const handler = handlers$1[name];
             listenerFn.call(doc, name, handler[key]);
@@ -19261,6 +19270,7 @@ function addHandlers(doc, cfg) {
  * @param {Document}  doc           The page document.
  * @param {Obejct}  cfg             Page configuration object
  */
+// FIXME: Remove object
 function removeHandlers(doc, cfg) {
     setHandlers(doc, cfg, false);
 }
@@ -19280,13 +19290,7 @@ var Handler = {
     removeAll: removeHandlers,
 };
 
-/**
- * Created pages cache.
- *
- * @private
- * @type {Object}
- */
-let pages = {};
+let pages = new Map();
 /**
  * Page level defaults that needs to be overridden.
  *
@@ -19402,7 +19406,9 @@ function makeDom(cfg, response = []) {
     // apply defaults
     _.defaults(cfg, defaults);
     // create Document
-    let doc = Parser.dom(cfg.template, _.isPlainObject(cfg.data) ? cfg.data : cfg.data?.(response));
+    let doc = Parser.dom(cfg.template, 
+    // FIXME: Change cfg.date type
+    _.isPlainObject(cfg.data) ? cfg.data : cfg.data?.(response));
     // prepare the Document
     prepareDom(doc, cfg);
     // call the after ready method if defined in the configuration
@@ -19422,7 +19428,9 @@ function makeDom(cfg, response = []) {
  * @param  {Object} cfg     The page configuration object
  * @return {Function}       A function that returns promise upon execution
  */
+// FIXME: Check Options type is fit
 function makePage(cfg) {
+    // FIXME: Check Options type is fit
     return (options) => {
         _.defaultsDeep(cfg, defaults);
         console.log("making page... options:", cfg);
@@ -19535,15 +19543,16 @@ var Page = {
             console.warn("Creating page without a name, name based navigation will not be possible.");
         }
         // warn in case the page already exists
-        if (pages[name]) {
+        if (pages.has(name)) {
             console.warn(`The given page name ${name} already exists! Overriding...`);
         }
+        // FIXME: Remove any
         let p = makePage(cfg);
         // cache for later user
-        pages[name] = p;
+        pages.set(name, p);
         // merge configurations on the page
         // FIXME: failed with merging read-only property.
-        // _.assign(p, cfg);
+        _.assign(p, cfg);
         // return the created page to allow chaining
         return p;
     },
@@ -19560,7 +19569,7 @@ var Page = {
      * @return {Page}           Page function
      */
     get(name) {
-        return pages[name];
+        return pages.get(name);
     },
     prepareDom: prepareDom,
     makeDom: makeDom,
@@ -19763,6 +19772,7 @@ const handlers = {
      * @event onLaunch
      * @alias module:ATV#onLaunch
      */
+    // FIXME: Remove object
     onLaunch(options = {}, fn) {
         Object.assign(libs, { launchOptions: options });
         console.log("launching application...");
@@ -19774,6 +19784,7 @@ const handlers = {
      * @event onError
      * @alias module:ATV#onError
      */
+    // FIXME: Remove object
     onError(options = {}, fn) {
         console.log("an error occurred in the application...");
         fn(options);
@@ -19784,6 +19795,7 @@ const handlers = {
      * @event onResume
      * @alias module:ATV#onResume
      */
+    // FIXME: Remove object
     onResume(options = {}, fn) {
         console.log("resuming application...");
         fn(options);
@@ -19794,6 +19806,7 @@ const handlers = {
      * @event onSuspend
      * @alias module:ATV#onSuspend
      */
+    // FIXME: Remove object
     onSuspend(options = {}, fn) {
         console.log("suspending application...");
         fn(options);
@@ -19804,6 +19817,7 @@ const handlers = {
      * @event onExit
      * @alias module:ATV#onExit
      */
+    // FIXME: Remove object
     onExit(options = {}, fn) {
         console.log("exiting application...");
         fn(options);
@@ -19814,6 +19828,7 @@ const handlers = {
      * @event onReload
      * @alias module:ATV#onReload
      */
+    // FIXME: Remove object
     onReload(options = {}, fn) {
         console.log("reloading application...");
         fn(options);
@@ -19970,6 +19985,7 @@ function start(cfg = {}) {
  * @param  {Object} [options]           Options value. {when: 'now'} // or 'onResume'
  * @param  {Object} [reloadData]        Custom data that needs to be passed while reloading the app
  */
+// FIXME: Remove object
 function reload(options, reloadData) {
     App.onReload(options);
     App.reload(options, reloadData);
