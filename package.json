@@ -1,7 +1,7 @@
 {
-  "name": "atvjs",
+  "name": "@mzyy94/atvjs-esm",
   "version": "0.2.9",
-  "description": "Blazing fast Apple TV application development using pure JavaScript.",
+  "description": "ESModule fork of atvjs",
   "keywords": [
     "atvjs",
     "appletv",
@@ -13,18 +13,19 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "publishConfig": {
+    "registry":"https://npm.pkg.github.com/",
     "access": "public"
   },
-  "homepage": "http://emadalam.github.io/atvjs",
+  "homepage": "http://github.com/mzyy94/atvjs-esm",
   "scripts": {
     "format": "prettier -w .",
     "docs": "jsdoc --configure jsdoc.conf.json --verbose",
     "prepublishOnly": "tsc"
   },
-  "author": "Emad Alam <emad.alam@yahoo.com>",
+  "author": "Yuki MIZUNO <mizuyuu0904@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/emadalam/atvjs.git"
+    "url": "http://github.com/mzyy94/atvjs-esm.git"
   },
   "license": "MIT",
   "devDependencies": {
