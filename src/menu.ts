@@ -9,11 +9,13 @@ const docStr =
 let created = false;
 
 // few private instances
-let doc = Parser.dom(docStr);
-let menuBarEl = doc.getElementsByTagName("menuBar").item(0) as MenuBarElement;
-let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0) as Element;
-let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
-let itemsCache: { [key in string]: MenuItem } = {};
+const doc = Parser.dom(docStr);
+const menuBarEl = doc.getElementsByTagName("menuBar").item(0) as MenuBarElement;
+const menuBarTpl = doc
+  .getElementsByTagName("menuBarTemplate")
+  .item(0) as Element;
+const menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
+const itemsCache: { [key in string]: MenuItem } = {};
 
 export interface Options {
   attributes: {};
@@ -24,7 +26,7 @@ export interface Options {
 }
 
 // default menu options
-let defaults: Options = {
+const defaults: Options = {
   attributes: {},
   rootTemplateAttributes: {},
   items: [],
@@ -95,7 +97,7 @@ function addItem(item: Item) {
     );
     return;
   }
-  let el = doc.createElement("menuItem");
+  const el = doc.createElement("menuItem");
   // assign unique id
   item.attributes = _.assign({}, item.attributes, {
     id: item.id,
@@ -183,7 +185,7 @@ function create(cfg: Partial<Options> = {}) {
  * @param {String} menuItemid		The id of the menu item as per the configuration
  */
 function setDocument(doc: Document, menuItemid: string) {
-  let menuItem = itemsCache[menuItemid];
+  const menuItem = itemsCache[menuItemid];
 
   if (!menuItem) {
     console.warn(
@@ -203,7 +205,7 @@ function setDocument(doc: Document, menuItemid: string) {
  * @param {String} menuItemid 		The id of the menu item as per the configuration
  */
 function setSelectedItem(menuItemid: string) {
-  let menuItem = itemsCache[menuItemid];
+  const menuItem = itemsCache[menuItemid];
 
   if (!menuItem) {
     console.warn(

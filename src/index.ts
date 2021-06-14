@@ -33,7 +33,7 @@ type Options = {
 let started = false;
 
 // all libraries
-let libs = {
+const libs = {
   /**
    * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
    * @alias module:ATV._
@@ -139,8 +139,8 @@ let libs = {
  */
 function initLibraries(cfg: Options = {}) {
   _.each(configMap, (keys, libName) => {
-    let lib = libs[libName as keyof typeof libs];
-    let options: Options = {};
+    const lib = libs[libName as keyof typeof libs];
+    const options: Options = {};
     _.each(keys, (key) => (options[key] = cfg[key]));
     "setOptions" in lib && lib.setOptions(options as object);
   });
@@ -235,11 +235,11 @@ function initAppHandlers(cfg: { [key in string]: (opt: object) => void } = {}) {
  *
  * @example
  * // create your pages
- * let SearchPage = ATV.Page.create({ page configurations });
- * let HomePage = ATV.Page.create({ page configurations });
- * let MoviesPage = ATV.Page.create({ page configurations });
- * let TVShowsPage = ATV.Page.create({ page configurations });
- * let LoginPage = ATV.Page.create({ page configurations });
+ * const SearchPage = ATV.Page.create({ page configurations });
+ * const HomePage = ATV.Page.create({ page configurations });
+ * const MoviesPage = ATV.Page.create({ page configurations });
+ * const TVShowsPage = ATV.Page.create({ page configurations });
+ * const LoginPage = ATV.Page.create({ page configurations });
  *
  * // template functions
  * const loaderTpl = (data) => `<document>
@@ -258,7 +258,7 @@ function initAppHandlers(cfg: { [key in string]: (opt: object) => void } = {}) {
  *   </document>`;
  *
  * // Global TVML styles
- * let globalStyles = `
+ * const globalStyles = `
  * .text-bold {
  *     font-weight: bold;
  * }
@@ -321,8 +321,8 @@ function initAppHandlers(cfg: { [key in string]: (opt: object) => void } = {}) {
  *     handlers: {
  *         select: {
  *             globalSelecthandler(e) {
- *                 let element = e.target;
- *                 let someElementTypeCheck = element.getAttribute('data-my-attribute');
+ *                 const element = e.target;
+ *                 const someElementTypeCheck = element.getAttribute('data-my-attribute');
  *
  *                 if (elementTypeCheck) {
  *                     // perform action

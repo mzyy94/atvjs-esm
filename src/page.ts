@@ -9,7 +9,7 @@ import Handler, { Config as HandlerConfig } from "./handler";
  * @private
  * @type {Object}
  */
-let pages = new Map<string, Page>();
+const pages = new Map<string, Page>();
 
 type Page = (options: PageOptions) => Promise<Document | null>;
 type Template = ((data: object) => string) | string;
@@ -101,8 +101,8 @@ function appendStyle(style: string, doc: Document) {
     console.log("invalid document or style string...", style, doc);
     return;
   }
-  let docEl = doc.getElementsByTagName("document").item(0) as Element;
-  let styleString = ["<style>", style, "</style>"].join("");
+  const docEl = doc.getElementsByTagName("document").item(0) as Element;
+  const styleString = ["<style>", style, "</style>"].join("");
   let headTags = doc.getElementsByTagName("head");
 
   let headTag = headTags && headTags.item(0);
@@ -152,7 +152,7 @@ function makeDom(cfg: Options & HandlerConfig, response: object = []) {
   // apply defaults
   _.defaults(cfg, defaults);
   // create Document
-  let doc = Parser.dom(
+  const doc = Parser.dom(
     cfg.template,
     _.isFunction(cfg.data) ? cfg.data(response) : cfg.data
   );
@@ -310,7 +310,7 @@ export default {
       console.warn(`The given page name ${name} already exists! Overriding...`);
     }
     // FIXME: Remove any
-    let p = makePage(cfg as any);
+    const p = makePage(cfg as any);
     // cache for later user
     pages.set(name, p);
     // merge configurations on the page

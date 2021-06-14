@@ -20,7 +20,7 @@ export type Config = {
  * @private
  * @type {Object<Object<Function>>}
  */
-let handlers = {
+const handlers = {
   /**
    * All the handlers associated to the select event.
    * @type {Object}
@@ -45,9 +45,9 @@ let handlers = {
      * @param  {Event} e    The event passed while this handler is invoked.
      */
     onLinkClick(e: Event) {
-      let element = e.target as Element;
-      let page = element.getAttribute(hrefAttribute);
-      let replace = element.getAttribute(hrefPageReplaceAttribute) == "true";
+      const element = e.target as Element;
+      const page = element.getAttribute(hrefAttribute);
+      const replace = element.getAttribute(hrefPageReplaceAttribute) == "true";
 
       if (!page) return;
 
@@ -88,8 +88,8 @@ let handlers = {
      * @param  {Event} e    The event passed while this handler was invoked
      */
     onModalCloseBtnClick(e: Event) {
-      let element = e.target as Element;
-      let closeBtn = element.getAttribute(modalCloseBtnAttribute);
+      const element = e.target as Element;
+      const closeBtn = element.getAttribute(modalCloseBtnAttribute);
 
       if (closeBtn) {
         console.log(
@@ -105,10 +105,10 @@ let handlers = {
      * @param  {Event} e    The event passed while this handler was invoked
      */
     onMenuItemSelect(e: Event) {
-      let element = e.target as MenuItem;
-      let menuId = element.getAttribute("id") as string;
-      let elementType = element.nodeName.toLowerCase();
-      let page = element.page;
+      const element = e.target as MenuItem;
+      const menuId = element.getAttribute("id") as string;
+      const elementType = element.nodeName.toLowerCase();
+      const page = element.page;
 
       if (elementType === "menuitem") {
         // no need to proceed if the page is already loaded or there is no page definition present
@@ -193,7 +193,7 @@ function setListeners(doc: Document, cfg: Config = {}, add = true) {
     listenerFn = doc.removeEventListener;
   }
   if (_.isObject(cfg.events)) {
-    let events = cfg.events;
+    const events = cfg.events;
 
     _.each(events, (fns, e) => {
       let [ev, selector] = e.split(" ");
@@ -212,7 +212,7 @@ function setListeners(doc: Document, cfg: Config = {}, add = true) {
       _.each(fns, (fn) => {
         fn = _.isString(fn) ? cfg[fn] : fn; // assume the function to be present on the page configuration obeject
         if (_.isFunction(fn)) {
-          let f = fn;
+          const f = fn;
           console.log(
             (add ? "adding" : "removing") + " event on documents...",
             ev,

@@ -66,7 +66,7 @@ function ajax(
       options
     );
 
-    let xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
 
     // set response type
     if (options.responseType) {

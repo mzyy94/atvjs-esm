@@ -1,7 +1,7 @@
 import _ from "lodash";
 import LZString from "lz-string";
 
-let Settings = {};
+const Settings = {};
 
 const lib = {
   /**

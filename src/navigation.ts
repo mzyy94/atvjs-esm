@@ -27,7 +27,7 @@ export interface Options {
 }
 
 // default options
-let defaults: Options = {
+const defaults: Options = {
   templates: {
     status: {},
   },
@@ -57,8 +57,8 @@ function setOptions(cfg = {}) {
  * @return {Document}               A newly created loader document
  */
 function getLoaderDoc(message: string) {
-  let tpl = defaults.templates?.loader;
-  let str = (tpl && tpl({ message: message })) || "<document></document>";
+  const tpl = defaults.templates?.loader;
+  const str = (tpl && tpl({ message: message })) || "<document></document>";
 
   return Parser.dom(str);
 }
@@ -99,7 +99,7 @@ function getErrorDoc(message: Options) {
  * @return {Document} The document
  */
 function getLastDocumentFromStack() {
-  let docs = navigationDocument.documents;
+  const docs = navigationDocument.documents;
   return docs[docs.length - 1];
 }
 
@@ -109,7 +109,7 @@ function getLastDocumentFromStack() {
  * @private
  */
 function initMenu() {
-  let menuCfg = defaults.menu;
+  const menuCfg = defaults.menu;
 
   // no configuration given and neither the menu created earlier
   // no need to proceed
@@ -270,8 +270,8 @@ function replaceDocument(doc: Document, docToReplace: Document) {
  * @return  {Document}                  The current document on the stack
  */
 function cleanNavigate(doc: Document, replace = false) {
-  let navigated = false;
-  let docs = navigationDocument.documents;
+  const navigated = false;
+  const docs = navigationDocument.documents;
   let last: Document | null = getLastDocumentFromStack();
 
   if (!replace && (!last || (last !== loaderDoc && last !== errorDoc))) {
@@ -336,7 +336,7 @@ function navigateToMenuPage() {
  * @return {Promise}            Returns a Promise that resolves upon successful navigation.
  */
 function navigate(page: string, options: PageOptions, replace: boolean) {
-  let p = Page.get(page);
+  const p = Page.get(page);
 
   if (_.isBoolean(options)) {
     replace = options;
@@ -354,9 +354,9 @@ function navigate(page: string, options: PageOptions, replace: boolean) {
   return new Promise((resolve, reject) => {
     if (!p) {
       console.error(page, "page does not exist!");
-      let tpl = defaults.templates?.status?.["404"];
+      const tpl = defaults.templates?.status?.["404"];
       if (tpl) {
-        let doc = showError({
+        const doc = showError({
           template: tpl,
           title: "404",
           message: "The requested page cannot be found!",
@@ -393,8 +393,8 @@ function navigate(page: string, options: PageOptions, replace: boolean) {
           Object.assign(error, { status: "500" });
         }
         // try showing a status level error page if it exists
-        let statusLevelErrorTpls = defaults.templates?.status;
-        let tpl = statusLevelErrorTpls?.[error.status];
+        const statusLevelErrorTpls = defaults.templates?.status;
+        const tpl = statusLevelErrorTpls?.[error.status];
         if (tpl) {
           showError(
             _.defaults(
@@ -500,7 +500,7 @@ function back() {
  * @alias module:navigation.removeActiveDocument
  */
 function removeActiveDocument() {
-  let doc = getActiveDocument();
+  const doc = getActiveDocument();
   doc && navigationDocument.removeDocument(doc);
 }
 
