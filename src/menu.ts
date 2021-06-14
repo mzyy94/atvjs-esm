@@ -233,11 +233,11 @@ export default {
     return created;
   },
   set created(val) {},
-  setOptions: setOptions,
-  create: create,
-  get: get,
-  setDocument: setDocument,
-  setSelectedItem: setSelectedItem,
+  setOptions,
+  create,
+  get,
+  setDocument,
+  setSelectedItem,
   /**
    * Get the menu loading message if provided in the config
    * @return {String} Loading message

@@ -233,7 +233,7 @@ function makePage(cfg: Options & HandlerConfig): Page {
  *
  */
 export default {
-  setOptions: setOptions,
+  setOptions,
   /**
    * Create a page that can be later used for navigation.
    *
@@ -295,9 +295,7 @@ export default {
       name = cfg.name;
     }
 
-    _.assign(cfg, {
-      name: name,
-    });
+    _.assign(cfg, { name });
 
     if (!name || !_.isString(name)) {
       console.warn(
@@ -334,6 +332,6 @@ export default {
   get(name: string) {
     return pages.get(name);
   },
-  prepareDom: prepareDom,
-  makeDom: makeDom,
+  prepareDom,
+  makeDom,
 };

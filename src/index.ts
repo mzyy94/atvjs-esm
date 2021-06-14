@@ -38,54 +38,54 @@ const libs = {
    * Internal alias to [lodash]{@link https://github.com/lodash/lodash} library
    * @alias module:ATV._
    */
-  _: _,
+  _,
   /**
    * Internal alias to [lz-string compression]{@link https://github.com/pieroxy/lz-string/} library
    * @alias module:ATV.LZString
    */
-  LZString: LZString,
+  LZString,
   /**
    * Ajax wrapper using Promises
    * @alias module:ATV.Ajax
    * @type {module:ajax}
    */
-  Ajax: Ajax,
+  Ajax,
   /**
    * Page level navigation methods.
    * @alias module:ATV.Navigation
    * @type {module:navigation}
    */
-  Navigation: Navigation,
+  Navigation,
   /**
    * Page Creation
    * @alias module:ATV.Page
    * @type {module:page}
    */
-  Page: Page,
+  Page,
   /**
    * A minimalistic parser wrapper using the builtin DOMParser
    * @alias module:ATV.Parser
    * @type {module:parser}
    */
-  Parser: Parser,
+  Parser,
   /**
    * Basic event handling including some default ones
    * @alias module:ATV.Handler
    * @type {module:handler}
    */
-  Handler: Handler,
+  Handler,
   /**
    * Apple TV settings object with some basic helpers
    * @alias module:ATV.Settings
    * @type {module:settings}
    */
-  Settings: Settings,
+  Settings,
   /**
    * TVML menu template creation with few utility methods
    * @alias module:ATV.Menu
    * @type {module:menu}
    */
-  Menu: Menu,
+  Menu,
   /**
    * Create a page that can be later used for navigation.
    * This is an alias of ATV.Page.create
@@ -379,10 +379,7 @@ function reload(options: { when: "now" | "onResume" }, reloadData: object) {
 }
 
 // add all utility methods
-_.assign(libs, PubSub, {
-  start: start,
-  reload: reload,
-});
+_.assign(libs, PubSub, { start, reload });
 
 /**
  * Dependency free publish/subscribe for JavaScript.

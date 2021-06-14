@@ -387,9 +387,9 @@ function removeHandlers(doc: Document, cfg: Config) {
  *
  */
 export default {
-  setOptions: setOptions,
-  addListeners: addListeners,
-  removeListeners: removeListeners,
+  setOptions,
+  addListeners,
+  removeListeners,
   addAll: addHandlers,
   removeAll: removeHandlers,
 };
