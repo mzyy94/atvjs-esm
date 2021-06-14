@@ -11,7 +11,7 @@ let loaderDoc: Document | null = null;
 let errorDoc: Document | null = null;
 let modalDoc: Document | null = null;
 
-interface Options {
+export interface Options {
   type?: string;
   title?: string;
   message?: string;

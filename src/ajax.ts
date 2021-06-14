@@ -1,7 +1,7 @@
 /**
  * Options for the ajax.
  */
-interface Options {
+export interface Options {
   responseType: "json" | "text";
   url: string;
   method: string;

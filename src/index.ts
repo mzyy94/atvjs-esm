@@ -406,4 +406,4 @@ _.assign(libs, PubSub, {
  *
  * @author eMAD <emad.alam@yahoo.com>
  */
-module.exports = libs;
+export default libs;

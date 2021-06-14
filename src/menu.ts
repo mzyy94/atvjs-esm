@@ -15,7 +15,7 @@ let menuBarTpl = doc.getElementsByTagName("menuBarTemplate").item(0) as Element;
 let menuBarFeature = menuBarEl && menuBarEl.getFeature("MenuBarDocument");
 let itemsCache: { [key in string]: MenuItem } = {};
 
-interface Options {
+export interface Options {
   attributes: {};
   rootTemplateAttributes: {};
   items: [];

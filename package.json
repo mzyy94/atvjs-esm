@@ -9,13 +9,19 @@
     "tvjs",
     "tvos"
   ],
-  "main": "dist/atv.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "http://emadalam.github.io/atvjs",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "format": "prettier -w .",
-    "docs": "node_modules/.bin/jsdoc --configure jsdoc.conf.json --verbose"
+    "docs": "node_modules/.bin/jsdoc --configure jsdoc.conf.json --verbose",
+    "prepublishOnly": "tsc"
   },
   "author": "Emad Alam <emad.alam@yahoo.com>",
   "repository": {
@@ -32,7 +38,8 @@
     "@types/pubsub-js": "^1.8.2",
     "jsdoc": "^3.4.3",
     "prettier": "^2.3.1",
-    "rollup": "^2.51.0"
+    "rollup": "^2.51.0",
+    "typescript": "^4.3.2"
   },
   "dependencies": {
     "lodash": "4.17.21",
