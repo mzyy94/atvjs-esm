@@ -3,8 +3,6 @@ import Page, { PageOptions } from "./page";
 import Parser from "./parser";
 import Menu from "./menu";
 
-import "tvml";
-
 // few private variables
 let menuDoc: Document | null = null;
 let loaderDoc: Document | null = null;

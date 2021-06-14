@@ -6,12 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./",
-    "paths": {
-      "*": ["./types/*"]
-    },
     "strict": true
   },
-  "include": ["src/*.ts"],
+  "include": ["src/*.ts", "types/*.d.ts"],
   "exclude": ["node_modules"]
 }
