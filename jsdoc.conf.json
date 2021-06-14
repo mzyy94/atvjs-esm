@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["./src/", "./README.md", "package.json"]
+    "include": ["./dist/", "./README.md", "package.json"]
   },
   "templates": {
     "cleverLinks": false,
