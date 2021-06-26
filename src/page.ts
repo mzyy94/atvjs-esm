@@ -313,7 +313,7 @@ export default {
     pages.set(name, p);
     // merge configurations on the page
     // FIXME: failed with merging read-only property.
-    _.assign(p, cfg);
+    // _.assign(p, cfg);
     // return the created page to allow chaining
     return p;
   },
